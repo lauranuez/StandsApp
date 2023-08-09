@@ -35,6 +35,7 @@ public class main extends JFrame {
     private JButton showDataBtn;
     private JButton buildBtn;
     private String numWeekSelected = null;
+    StandsTable standsTable;
 
     public main(){
         createMenuBar();
@@ -174,43 +175,26 @@ public class main extends JFrame {
     }
 
     private void build() {
-        SwingUtilities.invokeLater(() -> {
-            int i = 0;
-            for (Flight flight : flightListWeek){
-                flight.id = flight.airlineA + flight.numA + "/"+ flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ")";
-                String flightDayWeek = String.valueOf(flight.dayWeek);
-                if (flightDayWeek.equals("lunes")){
-                    flightListDayWeek.add(flight);
-                    flight.stand = (String) JOptionPane.showInputDialog(
-                         table,
-                        "Indicativo del vuelo: " + flight.id + " hora llegada: " + flight.timeA + " hora salida: " + flight.timeD,
-                        "Cambio de Stand",
-                        JOptionPane.PLAIN_MESSAGE,
-                        null,
-                        null,
-                        null
-                    );
-                }
-                if (i == 2){
-                    break;
-                }
-                i++;
+        asociar();
+        if (flightListWeek.size() > 0){
+            for (Flight flight : flightListWeek) {
+                flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ")";
             }
-            StandsTable standsTable = new StandsTable();
-            standsTable.showTable(flightListDayWeek);
-        });
+            standsTable = new StandsTable();
+            standsTable.prepareTable(flightListWeek);
+        }
     }
 
 
     private void showData() {
-        if (numWeekSelected != null) {
+        if (numWeekSelected != null && !flightList.isEmpty()) {
             asociar();
             FlightTableModel tableModel = (FlightTableModel) table.getModel();
             tableModel.setFlightList(flightListWeek);
             tableModel.fireTableDataChanged();
         }
         else{
-            JOptionPane.showMessageDialog(null, "Se debe elegir la semana a construir", "Elegir semana a construir", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Se debe elegir la semana a construir/añadir datos", "Elegir semana a construir", JOptionPane.WARNING_MESSAGE);
         }
     }
 

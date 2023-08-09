@@ -7,10 +7,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.List;
 
 public class StandsTable {
-    private static ArrayList<Flight> flights = new ArrayList<>();
+    private static ArrayList<Flight> flightListWeek = new ArrayList<>();
     private static String[] rowNames = {"HOLD1", "HOLD2", "HOLD3", "214", "217", "221", "245", "247", "250", "270","273", "277", "285", "291", "295", "287", "281", "340", "138A", "137", "136"};
     private static ArrayList<LocalTime> columnNames;
     private static JTable table;
@@ -19,12 +18,54 @@ public class StandsTable {
     private static JTextField nameText;
     private static JComboBox<LocalTime> startTimeComboBox;
     private static JComboBox<LocalTime> endTimeComboBox;
+    private static String[] days = {"lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"};
+    private static ArrayList<Flight> flightListDayWeek = new ArrayList<>();
+    JTabbedPane tabbedPane = new JTabbedPane();
 
+    public StandsTable() {
+        configureTabs();
+    }
 
-    public void showTable(ArrayList<Flight> flights){
-        this.flights = flights;
+    public void prepareTable(ArrayList<Flight> flights){
+        this.flightListWeek = flights;
+
+        if (flights.size() > 0){
+            int i = 0;
+            for (Flight flight : flightListWeek) {
+                String flightDayWeek = String.valueOf(flight.dayWeek);
+
+                if (flightDayWeek.equals(days[0])) {
+                    flight.stand = rowNames[i];
+                    flightListDayWeek.add(flight);
+                }
+                if (i == 20) {
+                    break;
+                }
+                i++;
+            }
+            showTable(flightListDayWeek);
+        }
+    }
+
+    public void configureTabs() {
+
+    }
+
+    public ArrayList<Flight> getFlightsForDay(String day) {
+        ArrayList<Flight> flightsForDay = new ArrayList<>();
+
+        for (Flight flight : flightListWeek) {
+            if (flight.dayWeek.equals(day)) {
+                flightsForDay.add(flight);
+            }
+        }
+
+        return flightsForDay;
+    }
+
+    public void showTable(ArrayList<Flight> flightsDay){
         columnNames = generarVectorHoras();
-        StandsTableModel model = new StandsTableModel(flights, columnNames, rowNames);
+        StandsTableModel model = new StandsTableModel(flightsDay, columnNames, rowNames);
 
         table = new JTable(model);
         frame = new JFrame("Tabla");
@@ -71,7 +112,6 @@ public class StandsTable {
             }
         });
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-       // table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         table.setAutoCreateRowSorter(true);
 
         int tablePreferredWidth = 1800;
@@ -83,7 +123,7 @@ public class StandsTable {
                 Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 cellComponent.setBackground(Color.WHITE);
                 Font headerFont = cellComponent.getFont();
-                Font newHeaderFont = headerFont.deriveFont(Font.BOLD, 16); // Cambia el tamaño de fuente de las filas
+                Font newHeaderFont = headerFont.deriveFont(Font.BOLD, 16);
                 cellComponent.setFont(newHeaderFont);
 
                 String cellValue = (String) value;
@@ -231,7 +271,7 @@ public class StandsTable {
     }
 
     private static Flight getFlightByNumber(String flightNumber) {
-        for (Flight flight : flights) {
+        for (Flight flight : flightListWeek) {
             if (flight.id.equals(flightNumber)) {
                 return flight;
             }
@@ -242,7 +282,7 @@ public class StandsTable {
     private static void searchCollision(String newStand, Flight flight){
         ArrayList<Flight> flightsCollision = new ArrayList<>();
 
-        for (Flight flightFor : flights) {
+        for (Flight flightFor : flightListWeek) {
             if (flightFor.stand.equals(newStand)) {
                 if (flight.timeA.isAfter(flightFor.timeA)){
                     if (flight.timeA.isBefore(flightFor.timeD)) {
