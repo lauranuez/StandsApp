@@ -20,10 +20,9 @@ public class StandsTable {
     private static JComboBox<LocalTime> endTimeComboBox;
     private static String[] days = {"lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"};
     private static ArrayList<Flight> flightListDayWeek = new ArrayList<>();
-    JTabbedPane tabbedPane = new JTabbedPane();
 
     public StandsTable() {
-        configureTabs();
+
     }
 
     public void prepareTable(ArrayList<Flight> flights){
@@ -45,10 +44,6 @@ public class StandsTable {
             }
             showTable(flightListDayWeek);
         }
-    }
-
-    public void configureTabs() {
-
     }
 
     public ArrayList<Flight> getFlightsForDay(String day) {
