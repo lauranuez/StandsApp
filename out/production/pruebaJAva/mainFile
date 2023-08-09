@@ -1,0 +1,256 @@
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class main extends JFrame {
+
+    private JTable table;
+    private JMenuItem asociarAEABtn;
+    private JMenuItem definirVuelosBtn;
+    private ArrayList<Flight> flightList = new ArrayList<>();
+    private ArrayList<FlightARMS> flightListARMS = new ArrayList<>();
+    private ArrayList<FlightLEVEL> flightListVictor = new ArrayList<>();
+    private FlightPairsTable flightPairsTable;
+
+    public main(){
+        createMenuBar();
+        setTitle("WB");
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        FlightTableModel tableModel = new FlightTableModel(flightList);
+        table = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(800, 600));
+
+        getContentPane().add(scrollPane);
+        pack();
+    }
+
+    public void createMenuBar(){
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu fileMenu = new JMenu("Archivo");
+
+        JMenuItem loadFlightItem = new JMenuItem("Cargar Vuelos");
+        loadFlightItem.addActionListener((event) -> loadFlights());
+
+        asociarAEABtn = new JMenuItem("Asociar vuelos");
+
+        asociarAEABtn.addActionListener((event) -> asociarAEA());
+        asociarAEABtn.setEnabled(false);
+
+        definirVuelosBtn = new JMenuItem("Definir vuelos");
+
+        definirVuelosBtn.addActionListener((event) -> definirVuelos());
+
+        JMenuItem ARMS = new JMenuItem("ARMS");
+        ARMS.addActionListener((event) -> ARMS());
+
+        JMenuItem ficheroVictor = new JMenuItem("Victor");
+        ficheroVictor.addActionListener((event) -> ficheroVictor());
+
+        fileMenu.add(loadFlightItem);
+        fileMenu.add(asociarAEABtn);
+        fileMenu.add(definirVuelosBtn);
+        fileMenu.add(ARMS);
+        fileMenu.add(ficheroVictor);
+        menuBar.add(fileMenu);
+        setJMenuBar(menuBar);
+    }
+
+    private void definirVuelos() {
+        ArrayList<FlightPairs> flightPairs = SetNumFlights.loadData();
+
+        if (flightPairs != null && !flightPairs.isEmpty()) {
+            if (flightPairsTable == null) {
+                flightPairsTable = new FlightPairsTable(flightPairs);
+                flightPairsTable.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        flightPairsTable = null;
+                    }
+                });
+            } else {
+                flightPairsTable.toFront();
+            }
+            flightPairsTable.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontraron datos en el archivo AEA.xlsx", "Sin datos", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void ficheroVictor() {
+        JFileChooser fileChooser = new JFileChooser();
+
+        Workbook workbook = null;
+
+        FileNameExtensionFilter excelFilter = new FileNameExtensionFilter("Archivos de Excel", "xlsx", "xls");
+        fileChooser.setFileFilter(excelFilter);
+
+        int result = fileChooser.showOpenDialog(main.this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            try {
+                FileInputStream inputStream = new FileInputStream(file);
+                if (filePath.toLowerCase().endsWith(".xlsx")) {
+                    workbook = new XSSFWorkbook(inputStream);
+                } else if (filePath.toLowerCase().endsWith(".xls")) {
+                    workbook = new HSSFWorkbook(inputStream);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Formato de archivo de Excel no válido", "Formato no válido", JOptionPane.WARNING_MESSAGE);
+                }
+                if (workbook!= null) {
+                    Sheet sheet = workbook.getSheetAt(0);
+
+                    flightListVictor = DataProcessorVictor.processFlightDataVictor(sheet);
+
+                    ArrayList<Flight> flightListJoin = JoinLEVEL.associateLEVELs(flightList,flightListVictor);
+                    if (flightListJoin != null) {
+                        flightList = flightListJoin;
+                        updateTable(flightListJoin);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Cargar otro fichero de excel", "Formato no válido", JOptionPane.WARNING_MESSAGE);
+                    }
+                    workbook.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Exception: " + ex, "Exception", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+        toFront();
+    }
+
+    private void ARMS() {
+        JFileChooser fileChooser = new JFileChooser();
+
+        Workbook workbook = null;
+
+        FileNameExtensionFilter excelFilter = new FileNameExtensionFilter("Archivos de Excel", "xlsx", "xls");
+        fileChooser.setFileFilter(excelFilter);
+
+        int result = fileChooser.showOpenDialog(main.this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            try {
+                FileInputStream inputStream = new FileInputStream(file);
+                if (filePath.toLowerCase().endsWith(".xlsx")) {
+                    workbook = new XSSFWorkbook(inputStream);
+                } else if (filePath.toLowerCase().endsWith(".xls")) {
+                    workbook = new HSSFWorkbook(inputStream);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Formato de archivo de Excel no válido", "Formato no válido", JOptionPane.WARNING_MESSAGE);
+                }
+                if (workbook!= null) {
+                    Sheet sheet = workbook.getSheetAt(0);
+                    flightListARMS = DataProcessorLEVEL.processFlightDataLEVEL(sheet);
+                    ArrayList<String> matriculasLEVEL = DataProcessorLEVEL.matriculasLEVEL;
+                    ArrayList<FlightLEVEL> flightListLEVEL = JoinLEVEL.joinLEVEL(flightListARMS, matriculasLEVEL);
+
+                    System.out.println("----------------------------ARMS---------------");
+                    for (FlightLEVEL flight : flightListLEVEL) {
+                        System.out.println("asientos " + flight.asientos + " aircraft: " + flight.aircraft + " airline: " + flight.airline + " dateAr: " + flight.dateAr + " numFlightAr: " + flight.numFlightAr + " origenAr: " + flight.origenAr + " destAr: " + flight.destAr +
+                                " matricula: " + flight.matricula + " timeAr: " + flight.timeAr + " timeDep: " + flight.timeDep + " dateDep: " + flight.dateDep + " numFlightDep: " + flight.numFlightDep + " origenDep: " + flight.origenDep + " desDep" + flight.destDep + " pernocta " + flight.pernocta);
+                    }
+                    System.out.println("--------------------------------------------------------------");
+
+                    ArrayList<Flight> flightListJoin = JoinLEVEL.associateLEVELs(flightList,flightListLEVEL);
+                    if (flightListJoin != null) {
+                        flightList = flightListJoin;
+                        updateTable(flightListJoin);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Cargar otro fichero de excel", "Formato no válido", JOptionPane.WARNING_MESSAGE);
+                    }
+                    workbook.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Exception: " + ex, "Exception", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+        toFront();
+    }
+
+    public void updateTable(ArrayList<Flight> flightListUpdate) {
+        FlightTableModel tableModel = new FlightTableModel(flightListUpdate);
+        table.setModel(tableModel);
+    }
+
+    public void asociarAEA() {
+        ArrayList<Flight> flightListAEA = AEAassociate.associate(flightList);
+        if (flightListAEA != null) {
+            flightList = flightListAEA;
+            updateTable(flightListAEA);
+            asociarAEABtn.setEnabled(false);
+        }
+    }
+
+    public void loadFlights(){
+        flightList = null;
+        JFileChooser fileChooser = new JFileChooser();
+
+        Workbook workbook = null;
+
+        FileNameExtensionFilter excelFilter = new FileNameExtensionFilter("Archivos de Excel", "xlsx", "xls");
+        fileChooser.setFileFilter(excelFilter);
+
+        int result = fileChooser.showOpenDialog(main.this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            try {
+                FileInputStream inputStream = new FileInputStream(file);
+                if (filePath.toLowerCase().endsWith(".xlsx")) {
+                    workbook = new XSSFWorkbook(inputStream);
+                } else if (filePath.toLowerCase().endsWith(".xls")) {
+                    workbook = new HSSFWorkbook(inputStream);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Formato de archivo de Excel no válido", "Formato no válido", JOptionPane.WARNING_MESSAGE);
+                }
+                if (workbook != null) {
+                    Sheet sheet = workbook.getSheetAt(0);
+
+                    flightList = DataProcessor.processFlightData(sheet);
+
+                    FlightTableModel tableModel = (FlightTableModel) table.getModel();
+                    tableModel.setFlightList(flightList);
+                    tableModel.fireTableDataChanged();
+
+                    workbook.close();
+
+                    if (!flightList.isEmpty()){
+                        asociarAEABtn.setEnabled(true);
+                    }
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Exception: " + ex, "Exception", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+        toFront();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            main main = new main();
+            main.setVisible(true);
+        });
+    }
+}
