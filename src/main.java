@@ -175,16 +175,24 @@ public class main extends JFrame {
     }
 
     private void build() {
-        asociar();
-        if (flightListWeek.size() > 0){
-            for (Flight flight : flightListWeek) {
-                flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ")";
+        if (numWeekSelected != null && !flightList.isEmpty()) {
+            if (flightListWeek.size() > 0){
+                for (Flight flight : flightListWeek) {
+                    flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ")";
+                }
+                openStandsMain(flightListWeek);
             }
-            standsTable = new StandsTable();
-            standsTable.prepareTable(flightListWeek);
+        }
+        else{
+            JOptionPane.showMessageDialog(null, "Se debe elegir la semana a construir/añadir datos", "Elegir semana a construir", JOptionPane.WARNING_MESSAGE);
         }
     }
 
+    private void openStandsMain(ArrayList<Flight> flightListWeek) {
+        SwingUtilities.invokeLater(() -> {
+            StandsMain standsMain = new StandsMain(flightListWeek);
+        });
+    }
 
     private void showData() {
         if (numWeekSelected != null && !flightList.isEmpty()) {
@@ -391,11 +399,26 @@ public class main extends JFrame {
                     Sheet sheet = workbook.getSheetAt(0);
                     flightListProcessorARMS = DataProcessorLEVEL.processFlightDataLEVEL(sheet);
                     ArrayList<String> matriculasLEVEL = DataProcessorLEVEL.matriculasLEVEL;
-                    if (flightListProcessorARMS == null){
-                        LEVELTextLabel.setText("El fichero no tiene el formato previsto.");
-                    }else{
-                        flightListARMS = JoinLEVEL.joinLEVEL(flightListProcessorARMS, matriculasLEVEL);
+                    flightListARMS = JoinLEVEL.joinLEVEL(flightListProcessorARMS, matriculasLEVEL);
+
+                    System.out.println("----------------------------ARMS---------------");
+                    for (FlightLEVEL flight : flightListARMS) {
+                        System.out.println("asientos " + flight.asientos + " aircraft: " + flight.aircraft + " airline: " + flight.airline + " dateAr: " + flight.dateAr + " numFlightAr: " + flight.numFlightAr + " origenAr: " + flight.origenAr + " destAr: " + flight.destAr +
+                                " matricula: " + flight.matricula + " timeAr: " + flight.timeAr + " timeDep: " + flight.timeDep + " dateDep: " + flight.dateDep + " numFlightDep: " + flight.numFlightDep + " origenDep: " + flight.origenDep + " desDep" + flight.destDep + " pernocta " + flight.pernocta);
+                    }
+                    System.out.println("--------------------------------------------------------------");
+
+                    /*ArrayList<Flight> flightListJoin = JoinLEVEL.associateLEVELs(flightList,flightListLEVEL);
+                    if (flightListJoin != null) {
+                        flightList = flightListJoin;
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Cargar otro fichero de excel", "Formato no válido", JOptionPane.WARNING_MESSAGE);
+                    }*/
+
+                    if (flightListARMS != null) {
                         LEVELTextLabel.setText("Los datos del fichero ARMS se han cargado correctamente.");
+                    } else {
+                        LEVELTextLabel.setText("No se han cargado los datos del fichero ARMS, el formato del excel no es el correcto.");
                     }
                     workbook.close();
                 }

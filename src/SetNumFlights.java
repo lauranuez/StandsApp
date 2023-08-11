@@ -19,14 +19,25 @@ public class SetNumFlights {
         if (!flightPairs.isEmpty()) {
             for (FlightPairs pair : flightPairs) {
                 for (Flight flight : flightListAEA) {
-                    //if (flight.numD == null || flight.numD == "" || flight.numD == " ") {
                         if (flight.airlineA.equals(pair.airline) && flight.numA.equals(pair.numFlightAr)) {
                             for (Flight flight1 : flightListAEA) {
                                 if (flight1.numD.equals(pair.numFlightDep) && flight1.aircraftD.equals(flight.aircraftA)) {
-                                    if (flight.pernocta == 0) {
-                                        if (flight1.dateD.isEqual(flight.dateA)) {
-                                            if (pair.aircraft != null) {
-                                                if (pair.aircraft.equals(flight1.aircraftD)) {
+                                    if (flight.numD == "-") {
+                                        if (flight.pernocta == 0) {
+                                            if (flight1.dateD.isEqual(flight.dateA)) {
+                                                if (pair.aircraft != null) {
+                                                    if (pair.aircraft.equals(flight1.aircraftD)) {
+                                                        flight.dateD = flight1.dateD;
+                                                        flight.airlineD = flight1.airlineD;
+                                                        flight.numD = flight1.numD;
+                                                        flight.timeD = flight1.timeD;
+                                                        flight.as = flight1.as;
+                                                        flight.af = flight1.af;
+                                                        flight.flightTypeD = flight1.flightTypeD;
+                                                        flight.aircraftD = flight1.aircraftD;
+                                                        removeFlightList.add(flight1);
+                                                    }
+                                                } else {
                                                     flight.dateD = flight1.dateD;
                                                     flight.airlineD = flight1.airlineD;
                                                     flight.numD = flight1.numD;
@@ -37,24 +48,24 @@ public class SetNumFlights {
                                                     flight.aircraftD = flight1.aircraftD;
                                                     removeFlightList.add(flight1);
                                                 }
-                                            } else {
-                                                flight.dateD = flight1.dateD;
-                                                flight.airlineD = flight1.airlineD;
-                                                flight.numD = flight1.numD;
-                                                flight.timeD = flight1.timeD;
-                                                flight.as = flight1.as;
-                                                flight.af = flight1.af;
-                                                flight.flightTypeD = flight1.flightTypeD;
-                                                flight.aircraftD = flight1.aircraftD;
-                                                removeFlightList.add(flight1);
                                             }
-                                        }
-                                    } else {
-                                        LocalDate dateFlight = flight.dateA;
-                                        LocalDate dateFlight1 = dateFlight.plusDays(flight.pernocta);
-                                        if (flight1.dateD.isEqual(dateFlight1)) {
-                                            if (pair.aircraft != null) {
-                                                if (pair.aircraft.equals(flight1.aircraftD)) {
+                                        } else {
+                                            LocalDate dateFlight = flight.dateA;
+                                            LocalDate dateFlight1 = dateFlight.plusDays(flight.pernocta);
+                                            if (flight1.dateD.isEqual(dateFlight1)) {
+                                                if (pair.aircraft != null) {
+                                                    if (pair.aircraft.equals(flight1.aircraftD)) {
+                                                        flight.dateD = flight1.dateD;
+                                                        flight.airlineD = flight1.airlineD;
+                                                        flight.numD = flight1.numD;
+                                                        flight.timeD = flight1.timeD;
+                                                        flight.as = flight1.as;
+                                                        flight.af = flight1.af;
+                                                        flight.flightTypeD = flight1.flightTypeD;
+                                                        flight.aircraftD = flight1.aircraftD;
+                                                        removeFlightList.add(flight1);
+                                                    }
+                                                } else {
                                                     flight.dateD = flight1.dateD;
                                                     flight.airlineD = flight1.airlineD;
                                                     flight.numD = flight1.numD;
@@ -65,16 +76,6 @@ public class SetNumFlights {
                                                     flight.aircraftD = flight1.aircraftD;
                                                     removeFlightList.add(flight1);
                                                 }
-                                            } else {
-                                                flight.dateD = flight1.dateD;
-                                                flight.airlineD = flight1.airlineD;
-                                                flight.numD = flight1.numD;
-                                                flight.timeD = flight1.timeD;
-                                                flight.as = flight1.as;
-                                                flight.af = flight1.af;
-                                                flight.flightTypeD = flight1.flightTypeD;
-                                                flight.aircraftD = flight1.aircraftD;
-                                                removeFlightList.add(flight1);
                                             }
                                         }
                                     }
