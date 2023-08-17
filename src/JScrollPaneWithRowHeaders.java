@@ -2,9 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public class JScrollPaneWithRowHeaders extends JScrollPane {
+    private JTable table;
 
     public JScrollPaneWithRowHeaders(JTable table, JTable rowHeader){
         super(table);
+        this.table = table;
         setRowHeaderView(rowHeader);
         setCorner(ScrollPaneConstants.UPPER_LEFT_CORNER, rowHeader.getTableHeader());
         setCorner(ScrollPaneConstants.LOWER_LEFT_CORNER, new JLabel(" "));
@@ -16,4 +18,6 @@ public class JScrollPaneWithRowHeaders extends JScrollPane {
         viewport.setPreferredSize(view.getPreferredSize());
         super.setRowHeaderView(viewport);
     }
+
+
 }

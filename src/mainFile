@@ -277,3 +277,91 @@ public class main extends JFrame {
             // Agrega aquí las acciones que quieras realizar
         }
     */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    System.out.println("Stand antes de cambiar el stand = " + flight.stand);
+                flightListWeek.remove(flight);
+                Flight newFlight = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, flight.timeA, flight.origenAirport, flight.AA, flight.flightTypeA, flight.dateD, flight.airlineD, flight.numD,
+                        flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, newStand, flight.puerta, flight.id);
+                //flight.setStand(newStand);
+                flightListWeek.add(newFlight);
+
+
+
+
+
+
+/*JPanel panelDays = (JPanel) daysTP.getComponentAt(currentTabIndex);
+JScrollPaneWithRowHeaders scrollPaneRow = (JScrollPaneWithRowHeaders) panelDays.getComponent(0);
+JTable tableToUpdate = scrollPaneRow.getTable();
+ArrayList<Flight> flightsDayUpdated = Utils.getFlightsDay(day, flightListWeek, rowNames);
+StandsTableModel newModel = new StandsTableModel(flightsDayUpdated, columnNames, rowNames);
+tableToUpdate.setModel(newModel);
+tableToUpdate.removeColumn(tableToUpdate.getColumnModel().getColumn(0));*/
+
+
+/*String newStand = (String) JOptionPane.showInputDialog(
+     frame,
+    "Indicativo del vuelo: " + flight.getFlightNumber() + " hora llegada: " + flight.getArrivalTime() + " hora salida: " + flight.getDepartureTime(),
+    "Cambio de Stand",
+    JOptionPane.PLAIN_MESSAGE,
+    null,
+    null,
+    flight.getStand()
+);*/
+
+
+
+public static void mouseClickedTable(MouseEvent e, JTable table){
+        int row = table.rowAtPoint(e.getPoint());
+        int col = table.columnAtPoint(e.getPoint());
+        Flight flight;
+        String flightNumber = null;
+
+        if (row >= 0 && col > 0) {
+            Object valueCell = table.getValueAt(row, col);
+            if (valueCell == null) {
+                System.out.println("No hay vuelo en esta celda.");
+            } else {
+                if (valueCell.equals(" ")) {
+                    boolean found = false;
+                    while (!found) {
+                        col = col - 1;
+                        valueCell = table.getValueAt(row, col);
+                        if (valueCell != null && !valueCell.equals(" ")){
+                            found = true;
+                            flightNumber = valueCell.toString();
+                        }
+                    }
+                }else{
+                    flightNumber = valueCell.toString();
+                }
+                if (flightNumber != null) {
+                    flight = Utils.getFlightByNumber(flightNumber,flightListWeek);
+                    if (flight != null) {
+                        System.out.println("Stand al hacer click" + flight.stand);
+                        String newStand = newStandMessage(flight);
+                        if (!newStand.equals(flight.stand) && !newStand.equals("")){
+                            newStand(flight, newStand, table);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+

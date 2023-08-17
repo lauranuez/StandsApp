@@ -32,12 +32,30 @@ public class StandsTableModel extends AbstractTableModel {
         } else {
             LocalTime time = columnNames.get(columnIndex - 1);
             for (Flight flight : flights) {
-                if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
-                    return flight.id;
-                } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
-                    return " ";
-                }else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
-                    return " ";
+                if (flight.stand == null) {
+                    continue;
+                }else{
+                    try {
+                        if (flight.type.equals("F")) {
+                            if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
+                                return flight.id;
+                            } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
+                                return " ";
+                            } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
+                                return " ";
+                            }
+                        } else {
+                            if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
+                                return flight.id;
+                            } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
+                                return "  ";
+                            } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
+                                return "  ";
+                            }
+                        }
+                    }catch (NullPointerException e){
+                        return null;
+                    }
                 }
             }
             return null;

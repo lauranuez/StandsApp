@@ -27,13 +27,15 @@ public class DataProcessor {
             String origenAirport = null;
             String AA = null;
             String flightTypeA = null;
+            String zonaLA = null;
             LocalDate dateD = null;
             String airlineD = null;
             String numD = null;
             LocalTime timeD = null;
-            String as = null; ////////////??????????
-            String af = null; ///////////???????????
+            String as = null;
+            String af = null;
             String flightTypeD = null;
+            String zonaSA = null;
             String aircraftD = null;
             int seats = 0;
 
@@ -177,6 +179,13 @@ public class DataProcessor {
                                 flightTypeA = "-";
                             }
                             break;
+                        case 14: //Zona L
+                            if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty()) {
+                                zonaLA = cell.getStringCellValue();
+                            } else {
+                                zonaLA = "-";
+                            }
+                            break;
                         case 18: //Fecha Salida
                             if (cell.getCellType() == CellType.NUMERIC) {
                                 try {
@@ -259,6 +268,13 @@ public class DataProcessor {
                                 flightTypeD = "-";
                             }
                             break;
+                        case 25: //Zona S
+                            if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty()) {
+                                zonaSA = cell.getStringCellValue();
+                            } else {
+                                zonaSA = "-";
+                            }
+                            break;
                         case 28: //Avion S
                             if (cell.getCellType() == CellType.STRING && !cell.getStringCellValue().isEmpty()) {
                                 aircraftD = cell.getStringCellValue();
@@ -270,18 +286,15 @@ public class DataProcessor {
                             break;
                     }
                 }
-
-                //if (dateA != null && dateA.isAfter(oneWeekBeforeCurrent) && dateA.isBefore(oneMonthAfterCurrent)) {
                 if (dateA != null) {
                     DayOfWeek dayOfWeek = dateA.getDayOfWeek();
                     String dayWeek = dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault());
 
                     int numWeek = dateA.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
 
-                    Flight flight = new Flight(dateA, AH, terminal, pernocta, aircraftA, airlineA, numA, timeA, origenAirport, AA, flightTypeA, dateD, airlineD, numD, timeD, as, af, flightTypeD, aircraftD, seats, numWeek, dayWeek, null, null, null);
+                    Flight flight = new Flight(dateA, AH, terminal, pernocta, aircraftA, airlineA, numA, timeA, origenAirport, AA, flightTypeA, zonaLA, dateD, airlineD, numD, timeD, as, af, flightTypeD, zonaSA, aircraftD, seats, numWeek, dayWeek, null, null, null, "F");
                     flightList.add(flight);
                 }
-               // }
             }
             i++;
         }

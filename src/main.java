@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 public class main extends JFrame {
 
-    private JMenuItem definirVuelosBtn;
     private ArrayList<Flight> flightList = new ArrayList<>();
     private ArrayList<Flight> flightListWeek = new ArrayList<>();
     private ArrayList<Flight> flightListDayWeek = new ArrayList<>();
@@ -35,7 +34,6 @@ public class main extends JFrame {
     private JButton showDataBtn;
     private JButton buildBtn;
     private String numWeekSelected = null;
-    StandsTable standsTable;
 
     public main(){
         createMenuBar();
@@ -178,7 +176,7 @@ public class main extends JFrame {
         if (numWeekSelected != null && !flightList.isEmpty()) {
             if (flightListWeek.size() > 0){
                 for (Flight flight : flightListWeek) {
-                    flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ")";
+                    flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ") " + flight.dateA;
                 }
                 openStandsMain(flightListWeek);
             }
@@ -190,7 +188,7 @@ public class main extends JFrame {
 
     private void openStandsMain(ArrayList<Flight> flightListWeek) {
         SwingUtilities.invokeLater(() -> {
-            StandsMain standsMain = new StandsMain(flightListWeek);
+            StandsMain standsMain = new StandsMain(flightListWeek, numWeekSelected);
         });
     }
 
@@ -232,9 +230,12 @@ public class main extends JFrame {
             }
         }
 
+        int numWeekSelectedPrevious = Integer.parseInt(numWeekSelected) - 1;
         for (Flight flight : flightList){
             String flightNumWeek = String.valueOf(flight.numWeek);
-            if (numWeekSelected.equals(flightNumWeek)){
+            if (numWeekSelectedPrevious == flight.numWeek && flight.dayWeek.equals("domingo") && flight.pernocta != 0){
+                flightListWeek.add(flight);
+            } else if (numWeekSelected.equals(flightNumWeek)){
                 flightListWeek.add(flight);
             }
         }

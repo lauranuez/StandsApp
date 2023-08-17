@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class FlightTableModel extends AbstractTableModel {
     private ArrayList<Flight> flights;
-    private String[] columnNames = {"Num Week", "Day Week", "Fecha L", "Hora L", "Terminal", "Pernocta", "AH", "Cía L", "Num L", "AO", "AA", "Clase L", "Avión L", "Fecha S", "Hora S", "Cía S", "Num S","AS", "AF", "Clase S", "Avion S", "Asientos"};
+    private String[] columnNames = {"Num Week", "Day Week", "Fecha L", "Hora L", "Terminal", "Pernocta", "AH", "Cía L", "Num L", "AO", "AA", "Clase L", "Zona L", "Avión L", "Fecha S", "Hora S", "Cía S", "Num S","AS", "AF", "Clase S", "Zona S", "Avion S", "Asientos"};
 
     public FlightTableModel(ArrayList<Flight> flights) {
         this.flights = flights;
@@ -40,16 +40,18 @@ public class FlightTableModel extends AbstractTableModel {
             case 9: return flight.origenAirport;
             case 10: return flight.AA;
             case 11: return flight.flightTypeA;
-            case 12: return flight.aircraftA;
-            case 13: return flight.dateD;
-            case 14: return flight.timeD;
-            case 15: return flight.airlineD;
-            case 16: return flight.numD;
-            case 17: return flight.as;
-            case 18: return flight.af;
-            case 19: return flight.flightTypeD;
-            case 20: return flight.aircraftD;
-            case 21: return flight.seats;
+            case 12: return flight.zonaL;
+            case 13: return flight.aircraftA;
+            case 14: return flight.dateD;
+            case 15: return flight.timeD;
+            case 16: return flight.airlineD;
+            case 17: return flight.numD;
+            case 18: return flight.as;
+            case 19: return flight.af;
+            case 20: return flight.flightTypeD;
+            case 21: return flight.zonaS;
+            case 22: return flight.aircraftD;
+            case 23: return flight.seats;
             default: return null;
         }
     }
