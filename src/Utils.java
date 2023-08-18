@@ -1,3 +1,5 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,7 +31,6 @@ public class Utils {
     }
 
    public static ArrayList<Flight> getFlightsDay(String day, ArrayList<Flight> flightListWeek, String[] rowNames ) {
-        ArrayList<Flight> flightsForDay = new ArrayList<>();
         ArrayList<Flight> flights = new ArrayList<>();
 
         for (Flight flight : flightListWeek) {
@@ -37,32 +38,6 @@ public class Utils {
                 flights.add(flight);
             }
         }
-/*
-        if (flights.size() > 0){
-            int i = 0;
-            for (Flight flight : flights) {
-                flightsForDay.add(flight);
-                if (i == 10) {
-                    break;
-                }
-                i++;
-            }
-
-        }*/
-       String fechaString = "2023-08-17";
-       DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-       LocalDate date = LocalDate.parse(fechaString, formato);
-
-       String timeStringS = "00:30";
-       DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm");
-       LocalTime startTime = LocalTime.parse(timeStringS, format);
-
-       String timeStringE = "01:50";
-       LocalTime endTime = LocalTime.parse(timeStringE, format);
-
-       Flight MTO = new Flight(date, "-", "terminal", 0, "-", "-", "-", startTime, "-", "-", "-", "-",date, "-", "-",
-               endTime, "-", "-", "-", "-", "-",0, 33, day, "214", "-", "MTO214", "M");
-       flights.add(MTO);
         return flights;
     }
 
@@ -86,22 +61,6 @@ public class Utils {
                 }
                 i++;
             }
-            String fechaString = "2023-08-17";
-            DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate date = LocalDate.parse(fechaString, formato);
-
-            String timeStringS = "00:30";
-            DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm");
-            LocalTime startTime = LocalTime.parse(timeStringS, format);
-
-            String timeStringE = "01:50";
-            LocalTime endTime = LocalTime.parse(timeStringE, format);
-
-
-            Flight MTO = new Flight(date, "-", "terminal", 0, "-", "-", "-", startTime, "-", "-", "-", "-",date, "-", "-",
-                    endTime, "-", "-", "-", "-", "-",0, 33, day, "214", "-", "MTO214", "M");
-            flightsForDay.add(MTO);
-
         }
         return flightsForDay;
     }
@@ -124,5 +83,15 @@ public class Utils {
             dayOfWeek = DayOfWeek.valueOf("SUNDAY");
         }
         return dayOfWeek;
+    }
+    public static Boolean standSearch(String[] rowNames, String newStand){
+        Boolean standSearchBool = false;
+        for (String standSearch : rowNames){
+            if(standSearch.equals(newStand)){
+                standSearchBool = true;
+                break;
+            }
+        }
+        return standSearchBool;
     }
 }

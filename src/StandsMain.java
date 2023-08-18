@@ -16,7 +16,7 @@ public class StandsMain extends JFrame {
     private static String[] days = {"lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"};
     private static JFrame frame;
     private static String[] rowNames = {"HOLD1", "HOLD2", "HOLD3", "214", "217", "221", "245", "247", "250", "270","273", "277", "285", "291", "295", "287", "281", "340", "138A", "137", "136"};
-    private static ArrayList<Flight> flightListWeek = new ArrayList<>();
+    static ArrayList<Flight> flightListWeek = new ArrayList<>();
     private static ArrayList<LocalTime> columnNames;
     private static JTextField standText;
     private static JTextField nameText;
@@ -147,7 +147,7 @@ public class StandsMain extends JFrame {
                 cellComponent.setFont(newHeaderFont);
                 String cellValue = (String) value;
                 try{
-                if (!cellValue.equals(null)) {
+                if (cellValue != null) {
                     if (cellValue.equals("  ")){
                         cellComponent.setBackground(Color.green);
                     }
@@ -183,12 +183,12 @@ public class StandsMain extends JFrame {
             if (valueCell == null) {
                 System.out.println("No hay vuelo en esta celda.");
             } else {
-                if (valueCell.equals(" ")) {
+                if (valueCell.equals(" ") || valueCell.equals("  ")) {
                     boolean found = false;
                     while (!found) {
                         col = col - 1;
                         valueCell = table.getValueAt(row, col);
-                        if (valueCell != null && !valueCell.equals(" ")){
+                        if (valueCell != null && !valueCell.equals(" ") && !valueCell.equals("  ")){
                             found = true;
                             flightNumber = valueCell.toString();
                         }
@@ -197,12 +197,22 @@ public class StandsMain extends JFrame {
                     flightNumber = valueCell.toString();
                 }
                 if (flightNumber != null) {
-                    flight = Utils.getFlightByNumber(flightNumber,flightListWeek);
+                    flight = Utils.getFlightByNumber(flightNumber, flightListWeek);
                     if (flight != null) {
-                        System.out.println("Stand al hacer click" + flight.stand);
-                        String newStand = newStandMessage(flight);
-                        if (!newStand.equals(flight.stand) && !newStand.equals("")){
-                            newStand(flight, newStand, table);
+                        if (flight.type == "F") {
+                            //Vuelo
+                            System.out.println("Stand al hacer click" + flight.stand);
+                            String newStand = newStandMessage(flight);
+                            if (!newStand.equals(flight.stand) && !newStand.equals("")) {
+                                newStand(flight, newStand, table);
+                            }
+                        } else if (flight.type == "M") {
+                            //Mantenimiento
+                            System.out.println("ClickMTO" + flight.stand);
+
+                            newMTOMessage(flight, table);
+                        } else if (flight.type == "P") {
+                            //Pernocta
                         }
                     }
                 }
@@ -211,7 +221,7 @@ public class StandsMain extends JFrame {
     }
 
     //Crea las pestañas de cada dia y añade a cada una su tabla
-    public JTabbedPane  setDaysTPanel() {
+    public JTabbedPane setDaysTPanel() {
         JTabbedPane daysTP = new JTabbedPane();
 
         for (String day : days){
@@ -226,14 +236,8 @@ public class StandsMain extends JFrame {
 
     //Busca si existe el nuevo stand que se asigna al vuelo, si existe, busca colision
     public static void newStand(Flight flight, String newStand, JTable table){
-        Boolean standSearchBool = false;
         if (newStand != null) {
-            for (String standSearch : rowNames){
-                if(standSearch.equals(newStand)){
-                    standSearchBool = true;
-                    break;
-                }
-            }
+            Boolean standSearchBool = Utils.standSearch(rowNames, newStand);
             if (standSearchBool)
             {
                 System.out.println("newStand antes de llamar a searchCollision" + flight.stand);
@@ -260,6 +264,117 @@ public class StandsMain extends JFrame {
         return stand;
     }
 
+
+    private static void newMTOMessage(Flight flight, JTable table){
+        InputDialogMTO dialog = new InputDialogMTO(frame, flight, columnNames);
+        dialog.setVisible(true);
+
+        String name = dialog.getIdMTO(); //""
+        String door = dialog.getTextDoorValue();
+        String stand = dialog.getTextStandValue();
+        LocalTime selectedEndTime = dialog.getEndTimeComboBox();
+        LocalTime selectedStartTime = dialog.getStartTimeComboBox();
+
+        if (selectedStartTime.isBefore(selectedEndTime)){
+            changeMTO(door, stand, name, selectedStartTime, selectedEndTime, flight, table);
+        }else{
+            JOptionPane.showMessageDialog(null, "La hora de salida es anterior a la de llegada",
+                    "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    public static void changeMTO(String door, String stand, String name, LocalTime startTime, LocalTime endTime, Flight flight, JTable table){
+        int currentTabIndex = daysTP.getSelectedIndex();
+        String day = daysTP.getTitleAt(currentTabIndex);
+
+        ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, flightListWeek, rowNames);
+
+        if (stand != null && !stand.equals("")) {
+            Boolean standSearchBool = Utils.standSearch(rowNames, stand);
+            if (standSearchBool)
+            {
+                if(!stand.equals(flight.stand)){
+                    flight.timeA = startTime;
+                    flight.timeD = endTime;
+                    ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, stand, flight);
+                    if (flightsCollision.size() == 0){
+                        flight.setStand(stand);
+                        table.repaint();
+                    }
+                    else if (flightsCollision.size() == 1) {
+                        if (flight.id.equals(flightsCollision.get(0).id)){
+                            flight.setStand(stand);
+                            table.repaint();
+                        }
+                        else{
+                            String collision = "Vuelos con los que se solapa: ";
+                            System.out.println(flightsCollision.size());
+                            for (Flight fl : flightsCollision) {
+                                System.out.println(fl.id);
+                                collision = collision + " " + fl.id;
+                            }
+                            System.out.println(collision);
+                            String newStandCollision = newStandCollision(collision, stand);
+                            if (newStandCollision!=null) {
+                                newStand(flight, newStandCollision, table);
+                            }
+                        }
+                    }
+                    else{
+                        String collision = "Vuelos con los que se solapa: ";
+                        System.out.println(flightsCollision.size());
+                        for (Flight fl : flightsCollision) {
+                            System.out.println(fl.id);
+                            collision = collision + " " + fl.id;
+                        }
+                        System.out.println(collision);
+                        String newStandCollision = newStandCollision(collision, stand);
+                        if (newStandCollision!=null) {
+                            newStand(flight, newStandCollision, table);
+                        }
+                    }
+                }
+                else{ //Cambiar hora, pero mismo stand y ver si coincide con alguno
+                    flight.timeA = startTime;
+                    flight.timeD = endTime;
+                    ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, stand, flight);
+                    if (flightsCollision.size() == 0){
+                        flight.setStand(stand);
+                        table.repaint();
+                    }else if (flightsCollision.size() == 1) {
+                        if (flight.id.equals(flightsCollision.get(0).id)){
+                            flight.setStand(stand);
+                            table.repaint();
+                        }
+                    }
+                    else{
+                        String collision = "Vuelos con los que se solapa: ";
+                        System.out.println(flightsCollision.size());
+                        for (Flight fl : flightsCollision) {
+                            System.out.println(fl.id);
+                            collision = collision + " " + fl.id;
+                        }
+                        System.out.println(collision);
+                        String newStandCollision = newStandCollision(collision, stand);
+                        if (newStandCollision!=null) {
+                            newStand(flight, newStandCollision, table);
+                        }
+                    }
+                }
+                if(!name.equals("")) {
+                    if (!name.equals(flight.id)) {
+                        flight.id = name;
+                        table.repaint();
+                    }
+                }
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "No existe ese stand",
+                        "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
     //Busca si el stand esta ocupado por otro vuelo
     private static void searchCollision(String newStand, Flight flight, JTable table){
         int currentTabIndex = daysTP.getSelectedIndex();
@@ -281,7 +396,9 @@ public class StandsMain extends JFrame {
             }
             System.out.println(collision);
             String newStandCollision = newStandCollision(collision, newStand);
-            newStand(flight, newStandCollision, table);
+            if(newStandCollision != null){
+                newStand(flight, newStandCollision, table);
+            }
         }
     }
 
@@ -301,50 +418,59 @@ public class StandsMain extends JFrame {
 
     //Metodo para guardar el mantenimiento establecido
     public static void saveMTO(){
-        LocalTime selectedStartTime = (LocalTime) startTimeComboBox.getSelectedItem();
-        LocalTime selectedEndTime = (LocalTime) endTimeComboBox.getSelectedItem();
-        int currentTabIndex = daysTP.getSelectedIndex();
-        String day = daysTP.getTitleAt(currentTabIndex);
+        Boolean standExist = Utils.standSearch(rowNames,standText.getText());
+        if(standExist){
+            LocalTime selectedStartTime = (LocalTime) startTimeComboBox.getSelectedItem();
+            LocalTime selectedEndTime = (LocalTime) endTimeComboBox.getSelectedItem();
 
-        DayOfWeek dayOfWeek = Utils.dayOfWeekWithDayName(day);
+            if (selectedStartTime.isBefore(selectedEndTime)){
+                int currentTabIndex = daysTP.getSelectedIndex();
+                String day = daysTP.getTitleAt(currentTabIndex);
 
-        if(dayOfWeek!=null) {
-            LocalDate date = LocalDate.now()
-                    .with(TemporalAdjusters.firstDayOfYear())
-                    .plusWeeks(Integer.parseInt(numWeek) - 1);
+                DayOfWeek dayOfWeek = Utils.dayOfWeekWithDayName(day);
 
-            if (dayOfWeek == DayOfWeek.SUNDAY) {
-                date = date.plusWeeks(1); // Agregar una semana si es domingo
+                if(dayOfWeek!=null) {
+                    LocalDate date = LocalDate.now()
+                            .with(TemporalAdjusters.firstDayOfYear())
+                            .plusWeeks(Integer.parseInt(numWeek) - 1);
+
+                    if (dayOfWeek == DayOfWeek.SUNDAY) {
+                        date = date.plusWeeks(1); // Agregar una semana si es domingo
+                    }
+
+                    date = date.with(TemporalAdjusters.nextOrSame(dayOfWeek));
+
+                    Flight MTO = new Flight(date, "-", "terminal", 0, "-", "-", "-", selectedStartTime, "-", "-", "-", "-",date, "-", "-",
+                            selectedEndTime, "-", "-", "-", "-", "-",0, Integer.parseInt(numWeek), day, standText.getText(), "-", nameText.getText(), "M");
+                    System.out.println("name: " + nameText.getText() + " starTime: " + selectedStartTime + " endTime: " + selectedEndTime + " stand: " + standText.getText() + " en la pestaña: " + daysTP.getTitleAt(currentTabIndex));
+
+                    ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, flightListWeek, rowNames);
+                    ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, standText.getText(), MTO);
+
+                    System.out.println("Mto collision: " + flightsCollision.size());
+                    if (flightsCollision.isEmpty()){
+                        flightListWeek.add(MTO);
+                        updateTable(day);
+                        //nameText.setText(" ");
+                        //standText.setText(" ");
+                    }
+                    else{
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                "El stand " + standText.getText() + "esta ocupado",
+                                standText.getText(),
+                                JOptionPane.WARNING_MESSAGE,
+                                null
+                        );
+                    }
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "La hora de salida es anterior a la de llegada",
+                        "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
             }
-
-            date = date.with(TemporalAdjusters.nextOrSame(dayOfWeek));
-
-            Flight MTO = new Flight(date, "-", "terminal", 0, "-", "-", "-", selectedStartTime, "-", "-", "-", "-",date, "-", "-",
-                    selectedEndTime, "-", "-", "-", "-", "-",0, Integer.parseInt(numWeek), day, standText.getText(), "-", nameText.getText(), "M");
-            System.out.println("name: " + nameText.getText() + " starTime: " + selectedStartTime + " endTime: " + selectedEndTime + " stand: " + standText.getText() + " en la pestaña: " + daysTP.getTitleAt(currentTabIndex));
-
-            ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, flightListWeek, rowNames);
-            ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, standText.getText(), MTO);
-
-            System.out.println("Mto collision: " + flightsCollision.size());
-            if (flightsCollision.isEmpty()){
-                flightListWeek.add(MTO);
-                updateTable(day);
-                System.out.println(flightListWeek.size());
-                Flight MTOadded = flightListWeek.get(flightListWeek.size() - 1);
-                System.out.println("dateA: " + MTOadded.dateA + " timeA: " + MTOadded.timeA + " dateD: " + MTOadded.dateD + " timeD: " + MTOadded.timeD + " numWeek: " + MTOadded.numWeek + " day: " + MTOadded.dayWeek + " stand: " + MTOadded.stand + "id: " + MTOadded.id);
-                Flight MTOadded2 = flightListWeek.get(flightListWeek.size() - 2);
-                System.out.println("dateA: " + MTOadded2.dateA + "timeA: " + MTOadded2.timeA + "dateD: " + MTOadded2.dateD + "timeD: " + MTOadded2.timeD + "numWeek: " + MTOadded2.numWeek + "day: " + MTOadded2.dayWeek + "stand: " + MTOadded2.stand + "id: " + MTOadded2.id);
-            }
-            else{
-                JOptionPane.showMessageDialog(
-                        frame,
-                        "El stand " + standText.getText() + "esta ocupado",
-                        standText.getText(),
-                        JOptionPane.WARNING_MESSAGE,
-                        null
-                );
-            }
+        }else{
+            JOptionPane.showMessageDialog(null, "No existe ese stand",
+                    "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
         }
     }
 

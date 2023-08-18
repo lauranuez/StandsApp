@@ -324,3 +324,44 @@ tableToUpdate.removeColumn(tableToUpdate.getColumnModel().getColumn(0));*/
     flight.getStand()
 );*/
 
+
+
+public static void mouseClickedTable(MouseEvent e, JTable table){
+        int row = table.rowAtPoint(e.getPoint());
+        int col = table.columnAtPoint(e.getPoint());
+        Flight flight;
+        String flightNumber = null;
+
+        if (row >= 0 && col > 0) {
+            Object valueCell = table.getValueAt(row, col);
+            if (valueCell == null) {
+                System.out.println("No hay vuelo en esta celda.");
+            } else {
+                if (valueCell.equals(" ")) {
+                    boolean found = false;
+                    while (!found) {
+                        col = col - 1;
+                        valueCell = table.getValueAt(row, col);
+                        if (valueCell != null && !valueCell.equals(" ")){
+                            found = true;
+                            flightNumber = valueCell.toString();
+                        }
+                    }
+                }else{
+                    flightNumber = valueCell.toString();
+                }
+                if (flightNumber != null) {
+                    flight = Utils.getFlightByNumber(flightNumber,flightListWeek);
+                    if (flight != null) {
+                        System.out.println("Stand al hacer click" + flight.stand);
+                        String newStand = newStandMessage(flight);
+                        if (!newStand.equals(flight.stand) && !newStand.equals("")){
+                            newStand(flight, newStand, table);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
