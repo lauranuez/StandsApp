@@ -7,7 +7,7 @@ public class InputDialog extends JDialog {
     private JTextField standText;
     private JTextField doorText;
 
-    public InputDialog(JFrame parent, Flight flight) {
+    public InputDialog(JFrame parent, Flight flight, String day) {
         super(parent, "Cambio de stand/puerta", true);
 
         standText = new JTextField(8);
@@ -21,6 +21,7 @@ public class InputDialog extends JDialog {
 
         JButton okButton = new JButton("OK");
         JButton cancelButton = new JButton("Cancel");
+        JButton carreteoButton = new JButton("Carreteo");
 
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -35,6 +36,12 @@ public class InputDialog extends JDialog {
                 dispose();
             }
         });
+        carreteoButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                StandsMain.carreteo(flight, day);
+            }
+        });
 
         JPanel infoPanel = new JPanel();
         infoPanel.add(flightInfoLabel);
@@ -47,6 +54,7 @@ public class InputDialog extends JDialog {
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
+        buttonPanel.add(carreteoButton);
 
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(infoPanel, BorderLayout.NORTH);

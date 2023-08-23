@@ -27,13 +27,15 @@ public class Flight {
     int numWeek;
     String dayWeek;
     String stand;
+    String stand2;
     String puerta;
     String id;
     String type;
+    String carreteo;
 
     public Flight(LocalDate arrivalDate, String AH, String terminal, int pernocta, String aircraftA, String airlineA, String numA,
                   LocalTime timeA, String origenAirport, String AA, String flightTypeA, String zonaLA, LocalDate dateD, String airlineD, String numD,
-                  LocalTime timeD, String as, String af, String flightTypeD, String zonaSA, String aircraftD, int seats, int week, String day, String stand, String puerta, String id, String type){
+                  LocalTime timeD, String as, String af, String flightTypeD, String zonaSA, String aircraftD, int seats, int week, String day, String stand, String stand2, String puerta, String id, String type, String carreteo){
 
         this.dateA = arrivalDate;
         this.AH = AH;
@@ -60,9 +62,11 @@ public class Flight {
         this.numWeek = week;
         this.dayWeek = day;
         this.stand = stand;
+        this.stand2 = stand2;
         this.puerta = puerta;
         this.id = id;
         this.type = type;
+        this.carreteo = carreteo;
     }
 
     public void setStand(String stand) {

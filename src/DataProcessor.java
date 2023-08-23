@@ -292,7 +292,7 @@ public class DataProcessor {
 
                     int numWeek = dateA.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
 
-                    Flight flight = new Flight(dateA, AH, terminal, pernocta, aircraftA, airlineA, numA, timeA, origenAirport, AA, flightTypeA, zonaLA, dateD, airlineD, numD, timeD, as, af, flightTypeD, zonaSA, aircraftD, seats, numWeek, dayWeek, null, null, null, "F");
+                    Flight flight = new Flight(dateA, AH, terminal, pernocta, aircraftA, airlineA, numA, timeA, origenAirport, AA, flightTypeA, zonaLA, dateD, airlineD, numD, timeD, as, af, flightTypeD, zonaSA, aircraftD, seats, numWeek, dayWeek, null, null, null, null, "F", "N");
                     flightList.add(flight);
                 }
             }

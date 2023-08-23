@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,14 +17,17 @@ public class StandsMain extends JFrame {
     private static String[] days = {"lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"};
     private static JFrame frame;
     private static String[] rowNames = {"HOLD1", "HOLD2", "HOLD3", "214", "217", "221", "245", "247", "250", "270","273", "277", "285", "291", "295", "287", "281", "340", "138A", "137", "136"};
-    static ArrayList<Flight> flightListWeek = new ArrayList<>();
+    private static ArrayList<Flight> flightListWeek = new ArrayList<>();
     private static ArrayList<LocalTime> columnNames;
     private static JTextField standText;
+    private static JTextField puertaText;
     private static JTextField nameText;
     private static JComboBox<LocalTime> startTimeComboBox;
     private static JComboBox<LocalTime> endTimeComboBox;
     private static JTabbedPane daysTP;
     private static String numWeek;
+    private static ArrayList<String> daysPernocta;
+
 
     public StandsMain(ArrayList<Flight> flightListWeek, String numWeekSelected) {
         this.flightListWeek = flightListWeek;
@@ -45,6 +49,15 @@ public class StandsMain extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(MAXIMIZED_BOTH);
         frame.setVisible(true);
+    }
+
+    public static void removeFlight(Flight flight, String day){
+        flightListWeek.remove(flight);
+        updateTable(day);
+    }
+
+    public static void setDaysCollision(ArrayList<String> days){
+        daysPernocta = days;
     }
 
     //Crea la tabla y le añade el clickListener
@@ -85,7 +98,7 @@ public class StandsMain extends JFrame {
         labelDefinirMantenimiento.setHorizontalAlignment(JLabel.CENTER);
         infoPanel.add(labelDefinirMantenimiento);
 
-        JPanel panelCells = new JPanel(new GridLayout(4, 2));
+        JPanel panelCells = new JPanel(new GridLayout(5, 2));
         panelCells.add(new JLabel("Nombre:"));
         nameText = new JTextField(8);
         panelCells.add(nameText);
@@ -98,6 +111,9 @@ public class StandsMain extends JFrame {
         panelCells.add(new JLabel("Stand:"));
         standText = new JTextField(8);
         panelCells.add(standText);
+        panelCells.add(new JLabel("Puerta:"));
+        puertaText = new JTextField(8);
+        panelCells.add(puertaText);
 
         JButton saveMTOButton = new JButton("Añadir Mantenimiento");
 
@@ -154,11 +170,26 @@ public class StandsMain extends JFrame {
                     else if(cellValue.equals(" ")){
                         cellComponent.setBackground(Color.cyan);
                     }
+                    else if(cellValue.equals("   ")){
+                        cellComponent.setBackground(Color.orange);
+                    }
+                    else if(cellValue.equals("    ")){
+                        cellComponent.setBackground(Color.magenta);
+                    }
                     else{
-                        if (cellValue.startsWith("MTO")){
-                            cellComponent.setBackground(Color.green);
-                        } else{
-                            cellComponent.setBackground(Color.cyan);
+                        String id = cellValue;
+                        Flight flight = Utils.getFlightByNumber(id, flightListWeek);
+                        if (flight.carreteo.equals("N")) {
+                            if (flight.type.equals("M")) {
+                                cellComponent.setBackground(Color.green);
+                            } else if (flight.type.equals("P")) {
+                                cellComponent.setBackground(Color.orange);
+                            } else {
+                                cellComponent.setBackground(Color.cyan);
+                            }
+                        }
+                        else{
+                            cellComponent.setBackground(Color.magenta);
                         }
                     }
                 }}
@@ -177,42 +208,64 @@ public class StandsMain extends JFrame {
         int col = table.columnAtPoint(e.getPoint());
         Flight flight;
         String flightNumber = null;
+        String valueCol = null;
 
         if (row >= 0 && col > 0) {
             Object valueCell = table.getValueAt(row, col);
             if (valueCell == null) {
                 System.out.println("No hay vuelo en esta celda.");
             } else {
-                if (valueCell.equals(" ") || valueCell.equals("  ")) {
+                if (valueCell.equals(" ") || valueCell.equals("  ") || valueCell.equals("   ") || valueCell.equals("    ")) {
                     boolean found = false;
                     while (!found) {
                         col = col - 1;
                         valueCell = table.getValueAt(row, col);
-                        if (valueCell != null && !valueCell.equals(" ") && !valueCell.equals("  ")){
+                        if (valueCell != null && !valueCell.equals(" ") && !valueCell.equals("  ") && !valueCell.equals("   ") && !valueCell.equals("    ")){
                             found = true;
                             flightNumber = valueCell.toString();
+                            valueCol = table.getColumnName(col);
                         }
                     }
                 }else{
                     flightNumber = valueCell.toString();
+                    valueCol = table.getColumnName(col);
                 }
                 if (flightNumber != null) {
-                    flight = Utils.getFlightByNumber(flightNumber, flightListWeek);
+                    flight = Utils.getFlightByNumberTable(flightNumber, flightListWeek,valueCol);
+                    int currentTabIndex = daysTP.getSelectedIndex();
+                    String day = daysTP.getTitleAt(currentTabIndex);
                     if (flight != null) {
                         if (flight.type == "F") {
                             //Vuelo
                             System.out.println("Stand al hacer click" + flight.stand);
-                            String newStand = newStandMessage(flight);
-                            if (!newStand.equals(flight.stand) && !newStand.equals("")) {
+                            String newStand = newStandMessage(flight,day);
+                            if (!newStand.equals(flight.stand) && !newStand.equals("") && !newStand.equals(flight.stand)) {
                                 newStand(flight, newStand, table);
                             }
                         } else if (flight.type == "M") {
                             //Mantenimiento
                             System.out.println("ClickMTO" + flight.stand);
-
                             newMTOMessage(flight, table);
                         } else if (flight.type == "P") {
                             //Pernocta
+                            ArrayList<Flight> listDay = Utils.getFlightsDay(day, numWeek, flightListWeek);
+                            Flight flightInDay = Utils.getFlightByNumberTable(flight.id, listDay, valueCol);
+                            if (flightInDay.type.equals("PAD")){
+                                System.out.println("Stand al hacer click" + flight.stand);
+                                String newStand = newStandMessage(flight, day);
+                                if (!newStand.equals(flight.stand) && !newStand.equals("")) {
+                                    newStand(flight, newStand, table);
+                                }
+                            }
+                            else{
+                                JOptionPane.showMessageDialog(
+                                        frame,
+                                        "No se puede mover esta pernocta",
+                                        "PERNOCTA",
+                                        JOptionPane.WARNING_MESSAGE,
+                                        null
+                                );
+                            }
                         }
                     }
                 }
@@ -225,7 +278,7 @@ public class StandsMain extends JFrame {
         JTabbedPane daysTP = new JTabbedPane();
 
         for (String day : days){
-            ArrayList<Flight> flightsDay  = Utils.getFlightsDayStands(day, flightListWeek, rowNames);
+            ArrayList<Flight> flightsDay  = Utils.getFlightsDayStands(day, rowNames, numWeek, flightListWeek);
             JPanel panelDays = new JPanel();
             JScrollPaneWithRowHeaders scrollPaneRow = setTable(flightsDay);
             panelDays.add(scrollPaneRow);
@@ -241,7 +294,11 @@ public class StandsMain extends JFrame {
             if (standSearchBool)
             {
                 System.out.println("newStand antes de llamar a searchCollision" + flight.stand);
-                searchCollision(newStand, flight, table);
+                if (flight.type == "P") {
+                    searchCollisionPernocta(newStand, flight, table);
+                } else {
+                    searchCollision(newStand, flight, table);
+                }
             }
             else{
                 JOptionPane.showMessageDialog(null, "No existe ese stand",
@@ -251,8 +308,8 @@ public class StandsMain extends JFrame {
     }
 
     //Abre la ventana para elgir el nuevo stand
-    public static String newStandMessage(Flight flight){
-        InputDialog dialog = new InputDialog(frame, flight);
+    public static String newStandMessage(Flight flight , String day) {
+        InputDialog dialog = new InputDialog(frame, flight, day);
         dialog.setVisible(true);
 
         String door = dialog.getTextDoorValue();
@@ -263,7 +320,6 @@ public class StandsMain extends JFrame {
 
         return stand;
     }
-
 
     private static void newMTOMessage(Flight flight, JTable table){
         InputDialogMTO dialog = new InputDialogMTO(frame, flight, columnNames);
@@ -287,7 +343,7 @@ public class StandsMain extends JFrame {
         int currentTabIndex = daysTP.getSelectedIndex();
         String day = daysTP.getTitleAt(currentTabIndex);
 
-        ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, flightListWeek, rowNames);
+        ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, numWeek, flightListWeek);
 
         if (stand != null && !stand.equals("")) {
             Boolean standSearchBool = Utils.standSearch(rowNames, stand);
@@ -380,12 +436,41 @@ public class StandsMain extends JFrame {
         int currentTabIndex = daysTP.getSelectedIndex();
         String day = daysTP.getTitleAt(currentTabIndex);
 
-        ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, flightListWeek, rowNames);
+        ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, numWeek, flightListWeek);
 
         ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, newStand, flight);
         if (flightsCollision.size() == 0){
             flight.setStand(newStand);
             table.repaint();
+        }
+        else{
+            String collision = "Vuelos con los que se solapa: ";
+            System.out.println(flightsCollision.size());
+            for(Flight fl:flightsCollision){
+                System.out.println(fl.id);
+                collision = collision + " " + fl.id;
+            }
+            System.out.println(collision);
+            String newStandCollision = newStandCollision(collision, newStand);
+            if(newStandCollision != null){
+                newStand(flight, newStandCollision, table);
+            }
+        }
+    }
+
+    private static void searchCollisionPernocta(String newStand, Flight flight, JTable table){
+        int currentTabIndex = daysTP.getSelectedIndex();
+        String day = daysTP.getTitleAt(currentTabIndex);
+
+        //ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, numWeek, flightListWeek);
+
+        ArrayList<Flight> flightsCollision = standsUtils.flightsCollisionPernocta(flightListWeek, newStand, flight, day, numWeek);
+        if (flightsCollision.size() == 0){
+            flight.setStand(newStand);
+            //table.repaint();
+            for(String daysPer : daysPernocta){
+                updateTable(daysPer);
+            }
         }
         else{
             String collision = "Vuelos con los que se solapa: ";
@@ -416,6 +501,63 @@ public class StandsMain extends JFrame {
         return newStandCollision;
     }
 
+    public static String standCarreteo(Flight flight) {
+        String newStandCarreteo = (String) JOptionPane.showInputDialog(
+                frame,
+                null,
+                "Stand carreteo: " + flight.id,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                null,
+                flight.stand
+        );
+        return newStandCarreteo;
+    }
+    public static void searchCollisionCarreteo( Flight flight , String day, String newStandCarreteo){
+        if (newStandCarreteo != null) {
+            if (!newStandCarreteo.equals(flight.stand)) {
+                ArrayList<Flight> flightsDay = Utils.getFlightsDay(day, numWeek, flightListWeek);
+                LocalTime departureTime = flight.timeD;
+                LocalTime carreteoTime = departureTime.minusHours(2).minusMinutes(30);
+                LocalTime stopTime = carreteoTime.minusMinutes(2);
+                Flight f1 = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, flight.timeA, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
+                        stopTime, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, null, flight.puerta, flight.id, flight.type, "Y");
+                Flight f2 = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, carreteoTime, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
+                        flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, newStandCarreteo, null, flight.puerta, flight.id, flight.type, "Y");
+                ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, newStandCarreteo, f2);
+                if (flightsCollision.size() == 0) {
+                    flight.stand2 = newStandCarreteo;
+                    flight.carreteo = "Y";
+                    flightListWeek.add(f1);
+                    flightListWeek.add(f2);
+                    updateTable(day);
+                } else {
+                    String collision = "Vuelos con los que se solapa: ";
+                    for (Flight fl : flightsCollision) {
+                        collision = collision + " " + fl.id;
+                    }
+                    carreteo(flight, day);
+                }
+
+            }
+        }
+    }
+
+    public static void carreteo(Flight flight, String day){
+        String newStandCarreteo = standCarreteo(flight);
+        if (newStandCarreteo != null) {
+            Boolean standSearchBool = Utils.standSearch(rowNames, newStandCarreteo);
+            if (standSearchBool)
+            {
+               searchCollisionCarreteo(flight, day, newStandCarreteo);
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "No existe ese stand",
+                        "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
     //Metodo para guardar el mantenimiento establecido
     public static void saveMTO(){
         Boolean standExist = Utils.standSearch(rowNames,standText.getText());
@@ -426,33 +568,19 @@ public class StandsMain extends JFrame {
             if (selectedStartTime.isBefore(selectedEndTime)){
                 int currentTabIndex = daysTP.getSelectedIndex();
                 String day = daysTP.getTitleAt(currentTabIndex);
-
-                DayOfWeek dayOfWeek = Utils.dayOfWeekWithDayName(day);
-
-                if(dayOfWeek!=null) {
-                    LocalDate date = LocalDate.now()
-                            .with(TemporalAdjusters.firstDayOfYear())
-                            .plusWeeks(Integer.parseInt(numWeek) - 1);
-
-                    if (dayOfWeek == DayOfWeek.SUNDAY) {
-                        date = date.plusWeeks(1); // Agregar una semana si es domingo
-                    }
-
-                    date = date.with(TemporalAdjusters.nextOrSame(dayOfWeek));
-
+                LocalDate date = Utils.getLocalDateWithDayName(day,numWeek);
+                if (date != null){
                     Flight MTO = new Flight(date, "-", "terminal", 0, "-", "-", "-", selectedStartTime, "-", "-", "-", "-",date, "-", "-",
-                            selectedEndTime, "-", "-", "-", "-", "-",0, Integer.parseInt(numWeek), day, standText.getText(), "-", nameText.getText(), "M");
+                            selectedEndTime, "-", "-", "-", "-", "-",0, Integer.parseInt(numWeek), day, standText.getText(), null, puertaText.getText(), nameText.getText(), "M", "N");
                     System.out.println("name: " + nameText.getText() + " starTime: " + selectedStartTime + " endTime: " + selectedEndTime + " stand: " + standText.getText() + " en la pestaña: " + daysTP.getTitleAt(currentTabIndex));
 
-                    ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, flightListWeek, rowNames);
+                    ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, numWeek, flightListWeek);
                     ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, standText.getText(), MTO);
 
                     System.out.println("Mto collision: " + flightsCollision.size());
                     if (flightsCollision.isEmpty()){
                         flightListWeek.add(MTO);
                         updateTable(day);
-                        //nameText.setText(" ");
-                        //standText.setText(" ");
                     }
                     else{
                         JOptionPane.showMessageDialog(
@@ -476,7 +604,7 @@ public class StandsMain extends JFrame {
 
     public static void updateTable(String day) {
         int tabIndex = Arrays.asList(days).indexOf(day);
-        ArrayList<Flight> flightsDay = Utils.getFlightsDay(day, flightListWeek, rowNames);
+        ArrayList<Flight> flightsDay = Utils.getFlightsDay(day, numWeek, flightListWeek);
         JScrollPaneWithRowHeaders scrollPaneRow = setTable(flightsDay);
         JPanel panelDays = new JPanel();
         panelDays.add(scrollPaneRow);
@@ -484,5 +612,4 @@ public class StandsMain extends JFrame {
         //tabIndex.repaint();
         //daysTP.getComponentAt(tabIndex).repaint();
     }
-
 }

@@ -52,8 +52,7 @@ public class InputDialogMTO extends JDialog{
         deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String day = flight.dayWeek;
-                StandsMain.flightListWeek.remove(flight);
-                StandsMain.updateTable(day);
+                StandsMain.removeFlight(flight, day);
                 dispose();
             }
         });

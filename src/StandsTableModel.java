@@ -36,21 +36,40 @@ public class StandsTableModel extends AbstractTableModel {
                     continue;
                 }else{
                     try {
-                        if (flight.type.equals("F")) {
-                            if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
-                                return flight.id;
-                            } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
-                                return " ";
-                            } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
-                                return " ";
+                        if (flight.carreteo.equals("N")) {
+                            if (flight.type.equals("F")) {
+                                if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
+                                    return flight.id;
+                                } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
+                                    return " ";
+                                } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
+                                    return " ";
+                                }
+                            } else if (flight.type.equals("PL") || flight.type.equals("PDD") || flight.type.equals("PAD") || flight.type.equals("P")) {
+                                if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
+                                    return flight.id;
+                                } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
+                                    return "   ";
+                                } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
+                                    return "   ";
+                                }
+                            } else {
+                                if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
+                                    return flight.id;
+                                } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
+                                    return "  ";
+                                } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
+                                    return "  ";
+                                }
                             }
-                        } else {
+                        }
+                        else{
                             if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
                                 return flight.id;
                             } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
-                                return "  ";
+                                return "    ";
                             } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
-                                return "  ";
+                                return "    ";
                             }
                         }
                     }catch (NullPointerException e){

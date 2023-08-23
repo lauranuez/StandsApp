@@ -15,7 +15,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 
 public class main extends JFrame {
-
     private ArrayList<Flight> flightList = new ArrayList<>();
     private ArrayList<Flight> flightListWeek = new ArrayList<>();
     private ArrayList<Flight> flightListDayWeek = new ArrayList<>();
@@ -23,7 +22,6 @@ public class main extends JFrame {
     private ArrayList<FlightLEVEL> flightListVictor = new ArrayList<>();
     private ArrayList <FlightARMS> flightListProcessorARMS = new ArrayList<>();
     private JTable table;
-
     private JLabel dataTextLabel;
     private JComboBox<String> weeksComboBox;
     private String selectedWeek;
@@ -176,7 +174,10 @@ public class main extends JFrame {
         if (numWeekSelected != null && !flightList.isEmpty()) {
             if (flightListWeek.size() > 0){
                 for (Flight flight : flightListWeek) {
-                    flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ") " + flight.dateA;
+                    flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ") " + flight.dateA + " " + flight.terminal;
+                    if(flight.pernocta != 0){
+                        flight.type = "P";
+                    }
                 }
                 openStandsMain(flightListWeek);
             }
@@ -193,7 +194,7 @@ public class main extends JFrame {
     }
 
     private void showData() {
-        if (numWeekSelected != null && !flightList.isEmpty()) {
+        if (numWeekSelected != null && flightList != null) {
             asociar();
             FlightTableModel tableModel = (FlightTableModel) table.getModel();
             tableModel.setFlightList(flightListWeek);
@@ -233,13 +234,18 @@ public class main extends JFrame {
         int numWeekSelectedPrevious = Integer.parseInt(numWeekSelected) - 1;
         for (Flight flight : flightList){
             String flightNumWeek = String.valueOf(flight.numWeek);
-            if (numWeekSelectedPrevious == flight.numWeek && flight.dayWeek.equals("domingo") && flight.pernocta != 0){
-                flightListWeek.add(flight);
+            LocalDate date = LocalDate.now().with(TemporalAdjusters.firstDayOfYear()).with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+            LocalDate mondayOfWeek = date.plusWeeks(numWeekSelectedPrevious);
+            LocalDate sundayOfWeek = mondayOfWeek.plusDays(6);
+            if (numWeekSelectedPrevious == flight.numWeek  && flight.pernocta != 0){
+                if (flight.dateD.isEqual(mondayOfWeek) || (flight.dateD.isBefore(sundayOfWeek) && flight.dateD.isAfter(mondayOfWeek)) || flight.dateD.isEqual(sundayOfWeek)){
+                    //flight.type = "P";
+                    flightListWeek.add(flight);
+                }
             } else if (numWeekSelected.equals(flightNumWeek)){
                 flightListWeek.add(flight);
             }
         }
-        System.out.println(flightListWeek.size());
     }
 
     private String[] getWeeksArray() {
@@ -401,14 +407,14 @@ public class main extends JFrame {
                     flightListProcessorARMS = DataProcessorLEVEL.processFlightDataLEVEL(sheet);
                     ArrayList<String> matriculasLEVEL = DataProcessorLEVEL.matriculasLEVEL;
                     flightListARMS = JoinLEVEL.joinLEVEL(flightListProcessorARMS, matriculasLEVEL);
-
+/*
                     System.out.println("----------------------------ARMS---------------");
                     for (FlightLEVEL flight : flightListARMS) {
                         System.out.println("asientos " + flight.asientos + " aircraft: " + flight.aircraft + " airline: " + flight.airline + " dateAr: " + flight.dateAr + " numFlightAr: " + flight.numFlightAr + " origenAr: " + flight.origenAr + " destAr: " + flight.destAr +
                                 " matricula: " + flight.matricula + " timeAr: " + flight.timeAr + " timeDep: " + flight.timeDep + " dateDep: " + flight.dateDep + " numFlightDep: " + flight.numFlightDep + " origenDep: " + flight.origenDep + " desDep" + flight.destDep + " pernocta " + flight.pernocta);
                     }
                     System.out.println("--------------------------------------------------------------");
-
+*/
                     /*ArrayList<Flight> flightListJoin = JoinLEVEL.associateLEVELs(flightList,flightListLEVEL);
                     if (flightListJoin != null) {
                         flightList = flightListJoin;
