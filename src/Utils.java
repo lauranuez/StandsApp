@@ -19,11 +19,11 @@ public class Utils {
         return horas;
     }
 
-    static Flight getFlightByNumber(String flightNumber, ArrayList<Flight> flightListWeek) {
-        Flight flightRequired = null;
+    static ArrayList<Flight> getFlightByNumber(String flightNumber, ArrayList<Flight> flightListWeek) {
+        ArrayList<Flight> flightRequired = new ArrayList<>();
         for (Flight flight : flightListWeek) {
             if (flight.id.equals(flightNumber)) {
-                flightRequired = flight;
+                flightRequired.add(flight);
             }
         }
         return flightRequired;
@@ -70,6 +70,9 @@ public class Utils {
                                 LocalTime.parse("23:55"), flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, flight.stand2, flight.puerta, flight.id, "PL", flight.carreteo);
                         flights.add(pernocta);
                     }
+                    else if (flight.carreteo.equals("Y") && flight.dateD.equals(date)) {
+                        flights.add(flight);
+                    }
                 }
             }
             /*
@@ -109,42 +112,41 @@ public class Utils {
         return date;
     }
 
-    public static ArrayList<Flight> getFlightsDayStands(String day, String[] rowNames, String numWeek, ArrayList<Flight> flightListWeek) {
+    public static ArrayList<Flight> getFlightsDayStands(String day, ArrayList<Stand> rowNames, String numWeek, ArrayList<Flight> flightListWeek) {
         ArrayList<Flight> flightsForDay = new ArrayList<>();
         ArrayList<Flight> flights = getFlightsDay(day, numWeek, flightListWeek);
 
         if (flights.size() > 0) {
-            int i = 3;
+            int i = 4;
             for (Flight flight : flights) {
                 if (!flight.type.equals("P")) {
                     if (flight.type.equals("PL") || flight.type.equals("PDD") || flight.type.equals("PAD") || flight.type.equals("P")) {
                         if (flight.stand == null) {
-                            String stand = rowNames[i];
+                            String stand = rowNames.get(i).numStand;
                             ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flights, stand, flight);
                             if (flightsCollision.size() != 0) {
                                 i++;
                             } else {
-                                flight.stand = rowNames[i];
-                                Flight flightMainList = getFlightByNumber(flight.id, flightListWeek);
-                                flightMainList.stand = stand;
-                                flightsForDay.add(flight);
+                                flight.stand = rowNames.get(i).numStand;
+                                ArrayList<Flight> flightMainList = getFlightByNumber(flight.id, flightListWeek);
+                                if (flightMainList.size() == 1){
+                                    flightMainList.get(0).stand = stand;
+                                    flightsForDay.add(flight);
+                                }
                             }
                         }
                         else{
                             flightsForDay.add(flight);
                         }
                     } else {
-                        String stand = rowNames[i];
+                        String stand = rowNames.get(i).numStand;
                         ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flights, stand, flight);
                         if (flightsCollision.size() != 0) {
                             i++;
                         } else {
-                            flight.stand = rowNames[i];
+                            flight.stand = rowNames.get(i).numStand;
                             flightsForDay.add(flight);
                         }
-                    }
-                    if (i == 13) {
-                        break;
                     }
                     i++;
                 }
@@ -179,10 +181,10 @@ public class Utils {
         return dayOfWeek;
     }
 
-    public static Boolean standSearch(String[] rowNames, String newStand){
+    public static Boolean standSearch(ArrayList<Stand> rowNames, String newStand){
         Boolean standSearchBool = false;
-        for (String standSearch : rowNames){
-            if(standSearch.equals(newStand)){
+        for (Stand standSearch : rowNames){
+            if(newStand.equals(standSearch.numStand)){
                 standSearchBool = true;
                 break;
             }

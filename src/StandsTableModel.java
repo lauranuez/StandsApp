@@ -6,9 +6,10 @@ import java.util.List;
 public class StandsTableModel extends AbstractTableModel {
     private ArrayList<Flight> flights;
     private List<LocalTime> columnNames;
-    private String[] rowNames;
+    //private String[] rowNames;
+    private ArrayList<Stand> rowNames;
 
-    public StandsTableModel(ArrayList<Flight> flights, List<LocalTime> columnNames, String[] rowNames) {
+    public StandsTableModel(ArrayList<Flight> flights, List<LocalTime> columnNames, ArrayList<Stand> rowNames) {
         this.flights = flights;
         this.columnNames = columnNames;
         this.rowNames = rowNames;
@@ -16,7 +17,7 @@ public class StandsTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return rowNames.length;
+        return rowNames.size();
     }
 
     @Override
@@ -26,10 +27,13 @@ public class StandsTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        String stand = rowNames[rowIndex];
+        String stand = rowNames.get(rowIndex).numStand;
         if (columnIndex == 0) {
             return stand;
-        } else {
+        } /*else if (columnIndex != 0 && stand.equals("  ")) {
+            return "     "; //5
+        }*/
+        else {
             LocalTime time = columnNames.get(columnIndex - 1);
             for (Flight flight : flights) {
                 if (flight.stand == null) {
@@ -41,25 +45,25 @@ public class StandsTableModel extends AbstractTableModel {
                                 if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
                                     return flight.id;
                                 } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
-                                    return " ";
+                                    return " "; //1
                                 } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
-                                    return " ";
+                                    return " "; //1
                                 }
                             } else if (flight.type.equals("PL") || flight.type.equals("PDD") || flight.type.equals("PAD") || flight.type.equals("P")) {
                                 if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
                                     return flight.id;
                                 } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
-                                    return "   ";
+                                    return "   "; //3
                                 } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
-                                    return "   ";
+                                    return "   "; //3
                                 }
                             } else {
                                 if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
                                     return flight.id;
                                 } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
-                                    return "  ";
+                                    return "  "; //2
                                 } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
-                                    return "  ";
+                                    return "  "; //2
                                 }
                             }
                         }
@@ -67,9 +71,9 @@ public class StandsTableModel extends AbstractTableModel {
                             if (flight.stand.equals(stand) && time.equals(flight.timeA)) {
                                 return flight.id;
                             } else if (flight.stand.equals(stand) && time.isAfter(flight.timeA) && time.isBefore(flight.timeD)) {
-                                return "    ";
+                                return "    "; //4
                             } else if (flight.stand.equals(stand) && time.equals(flight.timeD)) {
-                                return "    ";
+                                return "    "; //4
                             }
                         }
                     }catch (NullPointerException e){
@@ -98,9 +102,5 @@ public class StandsTableModel extends AbstractTableModel {
             }
         }
         fireTableDataChanged();
-    }
-
-    public String[] getRowNames() {
-        return rowNames;
     }
 }

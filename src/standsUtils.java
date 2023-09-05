@@ -52,8 +52,7 @@ public class standsUtils {
             String dayWeek = dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault());
             int numWeek = date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
             if(numWeekI.equals(String.valueOf(numWeek))) {
-                ArrayList<Flight> flightsDay = Utils.getFlightsDay(dayWeek, String.valueOf(numWeek), flightWeek);
-                flightsToLook.addAll(flightsDay);
+                flightsToLook = Utils.getFlightsDay(dayWeek, String.valueOf(numWeek), flightWeek);
                 days.add(dayWeek);
             }
             else{
