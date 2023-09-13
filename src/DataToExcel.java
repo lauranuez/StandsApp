@@ -19,7 +19,7 @@ public class DataToExcel {
     private static ArrayList<Aerolinea> aerolineas;
     private static Workbook workbook;
 
-    public static void generateExcel(ArrayList<Flight> flightListWeek, String numWeek, ArrayList<LocalTime> columnNames, File selectedDirectory, String filePath){
+    public static void generateExcel(ArrayList<Flight> flightListWeek, String numWeek, ArrayList<LocalTime> columnNames, File selectedDirectory, File filePath) throws FileNotFoundException {
         aerolineas = LoadStands.loadCias(filePath);
 
         workbook = new XSSFWorkbook();

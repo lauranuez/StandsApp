@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -29,11 +31,13 @@ public class StandsMain extends JFrame {
     private static JTabbedPane daysTP;
     private static String numWeek;
     private static ArrayList<String> daysPernocta;
+    private static File file;
 
-    public StandsMain(ArrayList<Flight> flightListWeek, String numWeekSelected, String filePath) {
+    public StandsMain(ArrayList<Flight> flightListWeek, String numWeekSelected, File file) throws IOException {
         this.flightListWeek = flightListWeek;
         this.numWeek = numWeekSelected;
-        stands = LoadStands.loadData(filePath);
+        this.file = file;
+        stands = LoadStands.loadData(file);
 
         frame = new JFrame("Asignación stands");
 
@@ -50,7 +54,11 @@ public class StandsMain extends JFrame {
 
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedDirectory = fileChooser.getSelectedFile();
-                    DataToExcel.generateExcel(flightListWeek, numWeek, columnNames, selectedDirectory, filePath);
+                    try {
+                        DataToExcel.generateExcel(flightListWeek, numWeek, columnNames, selectedDirectory, file);
+                    } catch (FileNotFoundException fileNotFoundException) {
+                        fileNotFoundException.printStackTrace();
+                    }
                 }
             }
         });

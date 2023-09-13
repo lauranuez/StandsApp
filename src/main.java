@@ -1,5 +1,7 @@
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -28,10 +30,12 @@ public class main extends JFrame {
     private String selectedLEVEL;
     private JLabel rotacionesLabel;
     private JLabel LEVELTextLabel;
+    private JLabel excelTextLabel;
     private JButton loadFlightsButton;
     private JButton showDataBtn;
     private JButton buildBtn;
     private String numWeekSelected = null;
+    private File rutaExcel = null;
 
     public main(){
         createMenuBar();
@@ -94,25 +98,19 @@ public class main extends JFrame {
         panelLEVEL.add(rotacionesComboBox);
         panelLEVEL.add(LEVELTextLabel);
 
-        JLabel aatReferenciaLabel = new JLabel("AAT referencia");
-        JComboBox<String> aatComboBox = new JComboBox<>();
-
-        aatComboBox.addItem("Elemento 1");
-        aatComboBox.addItem("Elemento 2");
+        JLabel aatReferenciaLabel = new JLabel("Excel datos estaticos");
+        JButton loadExcelEstatico = new JButton("Cargar");
+        excelTextLabel = new JLabel(" ");
 
         JPanel aatRefPanel = new JPanel(new FlowLayout());
         aatRefPanel.add(aatReferenciaLabel);
-        aatRefPanel.add(aatComboBox);
+        aatRefPanel.add(loadExcelEstatico);
+        aatRefPanel.add(excelTextLabel);
 
-        JLabel natReferenciaLabel = new JLabel("AAT referencia");
-        JComboBox<String> natComboBox = new JComboBox<>();
 
-        natComboBox.addItem("Elemento 1");
-        natComboBox.addItem("Elemento 2");
-
-        JPanel natRefPanel = new JPanel(new FlowLayout());
-        natRefPanel.add(natReferenciaLabel);
-        natRefPanel.add(natComboBox);
+        loadExcelEstatico.addActionListener(e -> {
+            excelEstatico();
+        });
 
         showDataBtn = new JButton("Mostrar datos");
 
@@ -156,9 +154,6 @@ public class main extends JFrame {
         gbc.gridy = 3;
         add(aatRefPanel, gbc);
 
-        gbc.gridy = 4;
-        add(natRefPanel, gbc);
-
         gbc.gridy = 5;
         add(buttonsPanel, gbc);
 
@@ -168,6 +163,28 @@ public class main extends JFrame {
         add(tableScrollPane, gbc);
 
         pack();
+    }
+
+    private void excelEstatico() {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+
+        FileNameExtensionFilter excelFilter = new FileNameExtensionFilter("Archivos de Excel", "xlsx", "xls");
+        fileChooser.setFileFilter(excelFilter);
+
+        int result = fileChooser.showOpenDialog(main.this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            System.out.println(filePath);
+            excelTextLabel.setText(filePath);
+            rutaExcel = file;
+            System.out.println(rutaExcel);
+        }
+        else{
+            JOptionPane.showMessageDialog(null, "Subir excel estatico", "Excel estatico", JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     private void build() {
@@ -190,7 +207,11 @@ public class main extends JFrame {
 
     private void openStandsMain(ArrayList<Flight> flightListWeek) {
         SwingUtilities.invokeLater(() -> {
-            //StandsMain standsMain = new StandsMain(flightListWeek, numWeekSelected);
+            try {
+                StandsMain standsMain = new StandsMain(flightListWeek, numWeekSelected, rutaExcel);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -327,7 +348,7 @@ public class main extends JFrame {
                     workbook.close();
 
                     if (flightList != null){
-                        dataTextLabel.setText("Los datos se han cargado correctamente.");
+                        dataTextLabel.setText(filePath);
                     } else {
                         dataTextLabel.setText("No se han cargado los datos, el formato del excel no es el correcto.");
                     }
@@ -367,7 +388,7 @@ public class main extends JFrame {
                     Sheet sheet = workbook.getSheetAt(0);
                     flightListVictor = DataProcessorVictor.processFlightDataVictor(sheet);
                     if (flightListVictor != null) {
-                        LEVELTextLabel.setText("Los datos del fichero Victor se han cargado correctamente.");
+                        LEVELTextLabel.setText(filePath);
                     } else {
                         LEVELTextLabel.setText("No se han cargado los datos  del fichero Victor, el formato del excel no es el correcto.");
                     }
@@ -408,23 +429,9 @@ public class main extends JFrame {
                     flightListProcessorARMS = DataProcessorLEVEL.processFlightDataLEVEL(sheet);
                     ArrayList<String> matriculasLEVEL = DataProcessorLEVEL.matriculasLEVEL;
                     flightListARMS = JoinLEVEL.joinLEVEL(flightListProcessorARMS, matriculasLEVEL);
-/*
-                    System.out.println("----------------------------ARMS---------------");
-                    for (FlightLEVEL flight : flightListARMS) {
-                        System.out.println("asientos " + flight.asientos + " aircraft: " + flight.aircraft + " airline: " + flight.airline + " dateAr: " + flight.dateAr + " numFlightAr: " + flight.numFlightAr + " origenAr: " + flight.origenAr + " destAr: " + flight.destAr +
-                                " matricula: " + flight.matricula + " timeAr: " + flight.timeAr + " timeDep: " + flight.timeDep + " dateDep: " + flight.dateDep + " numFlightDep: " + flight.numFlightDep + " origenDep: " + flight.origenDep + " desDep" + flight.destDep + " pernocta " + flight.pernocta);
-                    }
-                    System.out.println("--------------------------------------------------------------");
-*/
-                    /*ArrayList<Flight> flightListJoin = JoinLEVEL.associateLEVELs(flightList,flightListLEVEL);
-                    if (flightListJoin != null) {
-                        flightList = flightListJoin;
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Cargar otro fichero de excel", "Formato no válido", JOptionPane.WARNING_MESSAGE);
-                    }*/
 
                     if (flightListARMS != null) {
-                        LEVELTextLabel.setText("Los datos del fichero ARMS se han cargado correctamente.");
+                        LEVELTextLabel.setText(filePath);
                     } else {
                         LEVELTextLabel.setText("No se han cargado los datos del fichero ARMS, el formato del excel no es el correcto.");
                     }
