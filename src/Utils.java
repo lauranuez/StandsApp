@@ -59,15 +59,15 @@ public class Utils {
                 } else {
                     if (flight.dateA.isBefore(date) && flight.dateD.isEqual(date)) {
                         Flight pernocta = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, LocalTime.parse("00:00"), flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
-                                flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, flight.stand2, flight.puerta, flight.id, "PDD", flight.carreteo);
+                                flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, flight.stand2, flight.puerta, flight.id, "PDD", flight.carreteo, flight.id2 , flight.rowExcel);
                         flights.add(pernocta);
                     } else if (flight.dateA.isEqual(date) && flight.dateD.isAfter(date)) {
                         Flight pernocta = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, flight.timeA, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
-                                LocalTime.parse("23:55"), flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, flight.stand2, flight.puerta, flight.id, "PAD", flight.carreteo);
+                                LocalTime.parse("23:55"), flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, flight.stand2, flight.puerta, flight.id, "PAD", flight.carreteo, flight.id2, flight.rowExcel);
                         flights.add(pernocta);
                     } else if (flight.dateA.isBefore(date) && flight.dateD.isAfter(date)) {
                         Flight pernocta = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, LocalTime.parse("00:00"), flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
-                                LocalTime.parse("23:55"), flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, flight.stand2, flight.puerta, flight.id, "PL", flight.carreteo);
+                                LocalTime.parse("23:55"), flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, flight.stand2, flight.puerta, flight.id, "PL", flight.carreteo, flight.id2, flight.rowExcel);
                         flights.add(pernocta);
                     }
                     else if (flight.carreteo.equals("Y") && flight.dateD.equals(date)) {

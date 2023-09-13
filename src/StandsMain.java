@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -29,10 +30,10 @@ public class StandsMain extends JFrame {
     private static String numWeek;
     private static ArrayList<String> daysPernocta;
 
-    public StandsMain(ArrayList<Flight> flightListWeek, String numWeekSelected) {
+    public StandsMain(ArrayList<Flight> flightListWeek, String numWeekSelected, String filePath) {
         this.flightListWeek = flightListWeek;
         this.numWeek = numWeekSelected;
-        stands = LoadStands.loadData();
+        stands = LoadStands.loadData(filePath);
 
         frame = new JFrame("Asignación stands");
 
@@ -40,17 +41,33 @@ public class StandsMain extends JFrame {
 
         daysTP = setDaysTPanel();
 
+        JButton saveButton = new JButton("Exportar a Excel");
+        saveButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int returnValue = fileChooser.showOpenDialog(null);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedDirectory = fileChooser.getSelectedFile();
+                    DataToExcel.generateExcel(flightListWeek, numWeek, columnNames, selectedDirectory, filePath);
+                }
+            }
+        });
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(saveButton);
+
         JPanel maintenancePanel = setMTOLayout();
         JPanel mainPanel = new JPanel(new BorderLayout());
+
         mainPanel.add(maintenancePanel, BorderLayout.CENTER);
         mainPanel.add(daysTP, BorderLayout.NORTH);
-
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         frame.getContentPane().add(mainPanel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(MAXIMIZED_BOTH);
         frame.setVisible(true);
-
     }
 
     public static void removeFlight(Flight flight, String day){
@@ -89,7 +106,6 @@ public class StandsMain extends JFrame {
         JTable rowHeader = setRowHeader(model);
         rowHeader.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-
         //JScrollPaneWithRowHeaders scrollPaneRow = new JScrollPaneWithRowHeaders(table, rowHeader);
         JScrollPaneWithRowHeaders scrollPaneRow = new JScrollPaneWithRowHeaders(table,rowHeader);
         scrollPaneRow.setRowHeaderView(rowHeader);
@@ -104,9 +120,9 @@ public class StandsMain extends JFrame {
     //Crea el Layout para añadir un mantenimiento
     public static JPanel setMTOLayout(){
         JPanel infoPanel = new JPanel();
-        JLabel labelDefinirMantenimiento = new JLabel("Definir mantenimiento:");
+        /*JLabel labelDefinirMantenimiento = new JLabel("Definir mantenimiento:");
         labelDefinirMantenimiento.setHorizontalAlignment(JLabel.CENTER);
-        infoPanel.add(labelDefinirMantenimiento);
+        infoPanel.add(labelDefinirMantenimiento);*/
 
         JPanel panelCells = new JPanel(new GridLayout(5, 2));
         panelCells.add(new JLabel("Nombre:"));
@@ -532,7 +548,7 @@ public class StandsMain extends JFrame {
         if (newStandCarreteo != null) {
             if(flight.type.equals("P")){ //flight.type.equals("PL") || flight.type.equals("PDD") || flight.type.equals("PAD") ||
                 pernoctaCarreteo(newStandCarreteo, flight);
-
+                System.out.println("hola");
             }else{
                 if (!newStandCarreteo.equals(flight.stand)) {
                     ArrayList<Flight> flightsDay = Utils.getFlightsDay(day, numWeek, flightListWeek);
@@ -540,9 +556,9 @@ public class StandsMain extends JFrame {
                     LocalTime carreteoTime = departureTime.minusHours(2).minusMinutes(30);
                     LocalTime stopTime = carreteoTime.minusMinutes(2);
                     Flight f1 = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, flight.timeA, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
-                            stopTime, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, null, flight.puerta, flight.id, flight.type, "Y");
+                            stopTime, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, null, flight.puerta, flight.id, flight.type, "Y", flight.id2, flight.rowExcel);
                     Flight f2 = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, carreteoTime, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
-                            flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, newStandCarreteo, null, flight.puerta, flight.id, flight.type, "Y");
+                            flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, newStandCarreteo, null, flight.puerta, flight.id, flight.type, "Y", flight.id2, flight.rowExcel);
                     ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, newStandCarreteo, f2);
                     if (flightsCollision.size() == 0) {
                         flight.stand2 = newStandCarreteo;
@@ -572,9 +588,9 @@ public class StandsMain extends JFrame {
             LocalTime carreteoTime = departureTime.minusHours(2).minusMinutes(30);
             LocalTime stopTime = carreteoTime.minusMinutes(2);
             Flight f1 = new Flight(flight.dateA, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, flight.timeA, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
-                    stopTime, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, null, flight.puerta, flight.id, flight.type, "Y");
+                    stopTime, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, null, flight.puerta, flight.id, flight.type, "Y", flight.id2, flight.rowExcel);
             Flight f2 = new Flight(flight.dateD, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, carreteoTime, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
-                    flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, newStandCarreteo, null, flight.puerta, flight.id, flight.type, "Y");
+                    flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, newStandCarreteo, null, flight.puerta, flight.id, flight.type, "Y", flight.id2, flight.rowExcel);
             //ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, newStandCarreteo, f2);
             ArrayList<Flight> flightsCollision = standsUtils.flightsCollisionPernocta(flightListWeek, newStandCarreteo, f2, day, numWeek);
             if (flightsCollision.size() == 0) {
@@ -593,30 +609,7 @@ public class StandsMain extends JFrame {
                 carreteo(flight, day);
             }
         }
-
-        /*
-        if (flightsCollision.size() == 0){
-            flight.setStand(newStand);
-            //table.repaint();
-            for(String daysPer : daysPernocta){
-                updateTable(daysPer);
-            }
-        }
-        else {
-            String collision = "Vuelos con los que se solapa: ";
-            System.out.println(flightsCollision.size());
-            for (Flight fl : flightsCollision) {
-                System.out.println(fl.id);
-                collision = collision + " " + fl.id;
-            }
-            System.out.println(collision);
-            String newStandCollision = newStandCollision(collision, newStand);
-            if (newStandCollision != null) {
-                newStand(flight, newStandCollision, table);
-            }
-        }*/
     }
-
 
     public static void carreteo(Flight flight, String day){
         if(flight.carreteo.equals("N")) {
@@ -651,6 +644,7 @@ public class StandsMain extends JFrame {
     //Metodo para guardar el mantenimiento establecido
     public static void saveMTO(){
         Boolean standExist = Utils.standSearch(stands,standText.getText());
+        String terminal = "-";
         if(standExist){
             LocalTime selectedStartTime = (LocalTime) startTimeComboBox.getSelectedItem();
             LocalTime selectedEndTime = (LocalTime) endTimeComboBox.getSelectedItem();
@@ -659,9 +653,14 @@ public class StandsMain extends JFrame {
                 int currentTabIndex = daysTP.getSelectedIndex();
                 String day = daysTP.getTitleAt(currentTabIndex);
                 LocalDate date = Utils.getLocalDateWithDayName(day,numWeek);
+                for (Stand stand:stands){
+                    if(stand.numStand.equals(standText.getText())){
+                        terminal = stand.terminal;
+                    }
+                }
                 if (date != null){
-                    Flight MTO = new Flight(date, "-", "terminal", 0, "-", "-", "-", selectedStartTime, "-", "-", "-", "-",date, "-", "-",
-                            selectedEndTime, "-", "-", "-", "-", "-",0, Integer.parseInt(numWeek), day, standText.getText(), null, puertaText.getText(), nameText.getText(), "M", "N");
+                    Flight MTO = new Flight(date, "DIM", terminal, 0, "73H", "DIM", standText.getText(), selectedStartTime, "ZZZ", "ZZZ", "-", "-",date, "DIM", standText.getText(),
+                            selectedEndTime, "ZZZ", "ZZZ", "-", "-", "73H",0, Integer.parseInt(numWeek), day, standText.getText(), null, puertaText.getText(), nameText.getText(), "M", "N", nameText.getText(), null);
                     System.out.println("name: " + nameText.getText() + " starTime: " + selectedStartTime + " endTime: " + selectedEndTime + " stand: " + standText.getText() + " en la pestaña: " + daysTP.getTitleAt(currentTabIndex));
 
                     ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, numWeek, flightListWeek);

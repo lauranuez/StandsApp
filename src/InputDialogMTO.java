@@ -81,6 +81,7 @@ public class InputDialogMTO extends JDialog{
         getContentPane().add(panel, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
+
         pack();
         setLocationRelativeTo(parent);
     }

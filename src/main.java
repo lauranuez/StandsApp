@@ -175,6 +175,7 @@ public class main extends JFrame {
             if (flightListWeek.size() > 0){
                 for (Flight flight : flightListWeek) {
                     flight.id = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ") " + flight.dateA + " " + flight.terminal;
+                    flight.id2 = flight.airlineA + flight.numA + "/" + flight.numD + " " + flight.origenAirport + "-" + flight.af + " (" + flight.aircraftA + ") " + " " + flight.terminal + " " + flight.flightTypeD+ " " + flight.flightTypeA;
                     if(flight.pernocta != 0){
                         flight.type = "P";
                     }
@@ -189,7 +190,7 @@ public class main extends JFrame {
 
     private void openStandsMain(ArrayList<Flight> flightListWeek) {
         SwingUtilities.invokeLater(() -> {
-            StandsMain standsMain = new StandsMain(flightListWeek, numWeekSelected);
+            //StandsMain standsMain = new StandsMain(flightListWeek, numWeekSelected);
         });
     }
 

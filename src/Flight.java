@@ -32,10 +32,12 @@ public class Flight {
     String id;
     String type;
     String carreteo;
+    String id2;
+    Integer rowExcel;
 
     public Flight(LocalDate arrivalDate, String AH, String terminal, int pernocta, String aircraftA, String airlineA, String numA,
                   LocalTime timeA, String origenAirport, String AA, String flightTypeA, String zonaLA, LocalDate dateD, String airlineD, String numD,
-                  LocalTime timeD, String as, String af, String flightTypeD, String zonaSA, String aircraftD, int seats, int week, String day, String stand, String stand2, String puerta, String id, String type, String carreteo){
+                  LocalTime timeD, String as, String af, String flightTypeD, String zonaSA, String aircraftD, int seats, int week, String day, String stand, String stand2, String puerta, String id, String type, String carreteo, String id2, Integer rowExcel){
 
         this.dateA = arrivalDate;
         this.AH = AH;
@@ -67,9 +69,15 @@ public class Flight {
         this.id = id;
         this.type = type;
         this.carreteo = carreteo;
+        this.id2 = id2;
+        this.rowExcel = rowExcel;
     }
 
     public void setStand(String stand) {
         this.stand = stand;
+    }
+
+    public LocalTime getTimeA() {
+        return timeA;
     }
 }
