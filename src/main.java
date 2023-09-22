@@ -8,6 +8,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -115,7 +116,11 @@ public class main extends JFrame {
         showDataBtn = new JButton("Mostrar datos");
 
         showDataBtn.addActionListener(e -> {
-            showData();
+            try {
+                showData();
+            } catch (FileNotFoundException fileNotFoundException) {
+                fileNotFoundException.printStackTrace();
+            }
         });
 
         buildBtn = new JButton("Build");
@@ -215,7 +220,7 @@ public class main extends JFrame {
         });
     }
 
-    private void showData() {
+    private void showData() throws FileNotFoundException {
         if (numWeekSelected != null && flightList != null) {
             asociar();
             FlightTableModel tableModel = (FlightTableModel) table.getModel();
@@ -227,9 +232,9 @@ public class main extends JFrame {
         }
     }
 
-    private void asociar(){
+    private void asociar() throws FileNotFoundException {
         flightListWeek.removeAll(flightListWeek);
-        ArrayList<Flight> flightListJoinStaticFlights = SetNumFlights.associateExcel(flightList);
+        ArrayList<Flight> flightListJoinStaticFlights = SetNumFlights.associateExcel(flightList, rutaExcel);
 
         if (flightListJoinStaticFlights != null) {
             flightList = flightListJoinStaticFlights;

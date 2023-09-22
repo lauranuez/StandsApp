@@ -19,7 +19,6 @@ import java.util.Arrays;
 public class StandsMain extends JFrame {
     private static String[] days = {"lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"};
     private static JFrame frame;
-    //private static String[] rowNames = {"HOLD1", "HOLD2", "HOLD3", "214", "217", "221", "245", "247", "250", "270","273", "277", "285", "291", "295", "287", "281", "340", "138A", "137", "136"};
     private static ArrayList<Stand> stands;
     private static ArrayList<Flight> flightListWeek = new ArrayList<>();
     private static ArrayList<LocalTime> columnNames;
@@ -316,7 +315,8 @@ public class StandsMain extends JFrame {
         JTabbedPane daysTP = new JTabbedPane();
 
         for (String day : days){
-            ArrayList<Flight> flightsDay  = Utils.getFlightsDayStands(day, stands, numWeek, flightListWeek);
+            Utils.getFlightsDayStands(day, stands, numWeek, flightListWeek);
+            ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day,numWeek,flightListWeek);
             JPanel panelDays = new JPanel();
             JScrollPaneWithRowHeaders scrollPaneRow = setTable(flightsDay);
             panelDays.add(scrollPaneRow);
@@ -554,7 +554,7 @@ public class StandsMain extends JFrame {
 
     public static void searchCollisionCarreteo(Flight flight , String day, String newStandCarreteo){
         if (newStandCarreteo != null) {
-            if(flight.type.equals("P")){ //flight.type.equals("PL") || flight.type.equals("PDD") || flight.type.equals("PAD") ||
+            if(flight.type.equals("P")){
                 pernoctaCarreteo(newStandCarreteo, flight);
                 System.out.println("hola");
             }else{
@@ -591,7 +591,6 @@ public class StandsMain extends JFrame {
         String day = daysTP.getTitleAt(currentTabIndex);
 
         if (!newStandCarreteo.equals(flight.stand)) {
-            ArrayList<Flight> flightsDay = Utils.getFlightsDay(day, numWeek, flightListWeek);
             LocalTime departureTime = flight.timeD;
             LocalTime carreteoTime = departureTime.minusHours(2).minusMinutes(30);
             LocalTime stopTime = carreteoTime.minusMinutes(2);
@@ -599,7 +598,6 @@ public class StandsMain extends JFrame {
                     stopTime, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, flight.stand, null, flight.puerta, flight.id, flight.type, "Y", flight.id2, flight.rowExcel);
             Flight f2 = new Flight(flight.dateD, flight.AH, flight.terminal, flight.pernocta, flight.aircraftA, flight.airlineA, flight.numA, carreteoTime, flight.origenAirport, flight.AA, flight.flightTypeA, flight.zonaL, flight.dateD, flight.airlineD, flight.numD,
                     flight.timeD, flight.as, flight.af, flight.flightTypeD, flight.zonaS, flight.aircraftD, flight.seats, flight.numWeek, flight.dayWeek, newStandCarreteo, null, flight.puerta, flight.id, flight.type, "Y", flight.id2, flight.rowExcel);
-            //ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, newStandCarreteo, f2);
             ArrayList<Flight> flightsCollision = standsUtils.flightsCollisionPernocta(flightListWeek, newStandCarreteo, f2, day, numWeek);
             if (flightsCollision.size() == 0) {
                 flight.stand2 = newStandCarreteo;

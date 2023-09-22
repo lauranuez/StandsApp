@@ -87,12 +87,6 @@ public class Utils {
             }
             */
         }
-       System.out.println("----------------------------FlightsDAY -> " + day + "-----------------------------------------------------------");
-       System.out.println();
-       for (Flight flight : flights) {
-           System.out.println(" id: " + flight.id + " dateAr: " + flight.dateA  + " timeA: " + flight.timeA + " timeDep: " + flight.timeD + " dateDep: " + flight.dateD + " pernocta: " + flight.pernocta + " stand: " + flight.stand + " dayWeek: " + flight.dayWeek + " flightType " + flight.type);
-       }
-       System.out.println("--------------------------------------------------------------");
 
        return flights;
     }
@@ -112,10 +106,44 @@ public class Utils {
         return date;
     }
 
-    public static ArrayList<Flight> getFlightsDayStands(String day, ArrayList<Stand> rowNames, String numWeek, ArrayList<Flight> flightListWeek) {
-        ArrayList<Flight> flightsForDay = new ArrayList<>();
+    public static void getFlightsDayStands(String day, ArrayList<Stand> rowNames, String numWeek, ArrayList<Flight> flightListWeek) {
+        //ArrayList<Flight> flightsForDay = new ArrayList<>();
         ArrayList<Flight> flights = getFlightsDay(day, numWeek, flightListWeek);
-
+        Boolean standAsignado;
+        if (flights.size() > 0) {
+            for (Flight flight : flights) {
+                standAsignado = false;
+                if (flight.stand == null) {
+                    for (Stand stand: rowNames){
+                        if (!stand.numStand.equals("HOLD1") && !stand.numStand.equals("HOLD2") && !stand.numStand.equals("HOLD3")  && !stand.numStand.equals("HOLD4") && !standAsignado) {
+                            if (stand.terminal.equals(flight.terminal)) {
+                                ArrayList<Flight> flightsCollisionStand = standsUtils.flightsCollision(flights, stand.numStand, flight);
+                                if (flightsCollisionStand.size() < 1) {
+                                    //ArrayList<Flight> flightsCollisionPer = standsUtils.flightsCollisionPernocta(flights, stand.numStand, flight, day, numWeek);
+                                    //if (flightsCollisionPer.size() < 1) {
+                                        ArrayList<Flight> flightMainList = getFlightByNumber(flight.id, flightListWeek);
+                                        if (flightMainList.size() == 1) {
+                                            flightMainList.get(0).stand = stand.numStand;
+                                            flight.stand =stand.numStand;
+                                            standAsignado = true;
+                                            //flightsForDay.add(flight);
+                                        }
+                                    //}
+                                }
+                            }
+                            if(standAsignado){
+                                break;
+                            }
+                        }
+                    }
+                    if(standAsignado){
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+        /*
         if (flights.size() > 0) {
             int i = 4;
             for (Flight flight : flights) {
@@ -151,15 +179,8 @@ public class Utils {
                     i++;
                 }
             }
-        }
-        System.out.println("----------------------------FlightsSTAND -> " + day + "--------------------------------------------+++---------------");
-        System.out.println();
-        for (Flight flight : flightsForDay) {
-            System.out.println(" id: " + flight.id + " dateAr: " + flight.dateA  + " timeA: " + flight.timeA + " timeDep: " + flight.timeD + " dateDep: " + flight.dateD + " pernocta: " + flight.pernocta + " stand: " + flight.stand + " dayWeek " + flight.dayWeek + " flightType " + flight.type );
-        }
-        System.out.println("--------------------------------------------------------------");
-        return flightsForDay;
-    }
+        }*/
+    //}
 
     public static DayOfWeek dayOfWeekWithDayName(String dayName){
         DayOfWeek dayOfWeek = null;
@@ -190,5 +211,44 @@ public class Utils {
             }
         }
         return standSearchBool;
+    }
+
+    public static Boolean flightsCollisionStand(ArrayList<Flight> flightsDay, String newStand, Flight flight){
+        ArrayList<Flight> flightsCollision = new ArrayList<>();
+        LocalTime timeD = flight.timeD;
+        Boolean collision = false;
+
+        for (Flight flightFor : flightsDay) {
+            try{
+                if (flightFor.stand.equals(newStand) && !flightFor.id.equals(flight.id)) {
+                    if (flight.timeA.isAfter(flightFor.timeA)) {
+                        if (flight.timeA.isBefore(flightFor.timeD)) {
+                            if (timeD.isAfter(flightFor.timeD) || timeD.equals(flightFor.timeD) || timeD.isBefore(flightFor.timeD)) {
+                                flightsCollision.add(flightFor);
+                            }
+                        }
+                    } else if (flight.timeA.isBefore(flightFor.timeA)) {
+                        if (timeD.isAfter(flightFor.timeA)) {
+                            if (timeD.isAfter(flightFor.timeD) || timeD.equals(flightFor.timeD) || timeD.isBefore(flightFor.timeD)) {
+                                flightsCollision.add(flightFor);
+                            }
+                        }
+                    } else {
+                        if (timeD.isAfter(flightFor.timeD) || timeD.equals(flightFor.timeD) || timeD.isBefore(flightFor.timeD)) {
+                            flightsCollision.add(flightFor);
+                        }
+                    }
+                }
+
+            }catch(NullPointerException e){
+
+            }
+        }
+
+        if (flightsCollision.size() > 0){
+            collision = true;
+        }
+
+        return collision;
     }
 }

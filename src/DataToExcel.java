@@ -31,7 +31,7 @@ public class DataToExcel {
         Sheet hojaAAT = workbook.createSheet("AAT");
         head(hojaAAT, numWeek, "AAT");
 
-        writeData(hojaNAT,hojaAAT, flightListWeek, numWeek, columnNames);
+        writeData(hojaNAT, hojaAAT, flightListWeek, numWeek, columnNames);
         //Crear archivo
         File directorioActual = new File(selectedDirectory, nombreArchivo);
         String ubicacion = directorioActual.getAbsolutePath();
@@ -44,9 +44,11 @@ public class DataToExcel {
             JOptionPane.showMessageDialog(null, "Libro guardado correctamente",
                     "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
         } catch (FileNotFoundException ex) {
-            System.out.println("Error de filenotfound");
+            JOptionPane.showMessageDialog(null, "Error de filenotfound: cierra el excel y vuelve a intentarlo",
+                    "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
         } catch (IOException ex) {
-            System.out.println("Error de IOException");
+            JOptionPane.showMessageDialog(null, "Error de IOException",
+                    "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -64,70 +66,70 @@ public class DataToExcel {
                 0,
                 0,
                 1,
-                7
+                8
         ));
-        Cell lunes = firstRow.createCell(8);
+        Cell lunes = firstRow.createCell(9);
         lunes.setCellValue("Lunes");
         lunes.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                8,
-                11
+                9,
+                12
         ));
-        Cell martes = firstRow.createCell(12);
+        Cell martes = firstRow.createCell(13);
         martes.setCellValue("Martes");
         martes.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                12,
-                15
+                13,
+                16
         ));
-        Cell mie = firstRow.createCell(16);
+        Cell mie = firstRow.createCell(17);
         mie.setCellValue("Miercoles");
         mie.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                16,
-                19
+                17,
+                20
         ));
-        Cell jue = firstRow.createCell(20);
+        Cell jue = firstRow.createCell(21);
         jue.setCellValue("Jueves");
         jue.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                20,
-                23
+                21,
+                24
         ));
-        Cell vie = firstRow.createCell(24);
+        Cell vie = firstRow.createCell(25);
         vie.setCellValue("Viernes");
         vie.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                24,
-                27
+                25,
+                28
         ));
-        Cell sab = firstRow.createCell(28);
+        Cell sab = firstRow.createCell(29);
         sab.setCellValue("Sabado");
         sab.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                28,
-                31
+                29,
+                32
         ));
-        Cell dom = firstRow.createCell(32);
+        Cell dom = firstRow.createCell(33);
         dom.setCellValue("Domingo");
         dom.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                32,
-                35
+                33,
+                37
         ));
         Row secondRow = sheet.createRow(1);
         Cell AAHH = secondRow.createCell(0);
@@ -151,10 +153,16 @@ public class DataToExcel {
         Cell horaSalida = secondRow.createCell(6);
         horaSalida.setCellValue("Hora salida UTC");
         horaSalida.setCellStyle(segCabecera);
-        Cell destino = secondRow.createCell(7);
+        Cell origen = secondRow.createCell(7);
+        origen.setCellValue("Origen");
+        origen.setCellStyle(segCabecera);
+        Cell destino = secondRow.createCell(8);
         destino.setCellValue("Destino");
         destino.setCellStyle(segCabecera);
-        for (int i = 8; i < 36; i++){
+        Cell tipoServicio = secondRow.createCell(9);
+        tipoServicio.setCellValue("Tipo de servicio");
+        tipoServicio.setCellStyle(segCabecera);
+        for (int i = 10; i < 38; i++){
             Cell avo = secondRow.createCell(i);
             avo.setCellValue("Avo.");
             avo.setCellStyle(segCabecera);
@@ -187,7 +195,8 @@ public class DataToExcel {
             Boolean addFlight = false;
             Boolean searchFlight = false;
             if (flight.numWeek != Integer.parseInt(numWeek)) {
-                flight.af = "ZZZ";
+                flight.as = "ZZZ";
+                flight.AA = "ZZZ";
                 pernoctas.add(flight);
                 continue;
             }
@@ -251,11 +260,9 @@ public class DataToExcel {
         XSSFCellStyle rojoAH = EstilosExcel.rojoAH(workbook);
         XSSFCellStyle azulAH = EstilosExcel.azulAH(workbook);
         XSSFCellStyle morado = EstilosExcel.morado(workbook);
-        XSSFCellStyle rojo = EstilosExcel.rojo(workbook);
         XSSFCellStyle verdeAH = EstilosExcel.verdeAH(workbook);
         XSSFCellStyle bordes = EstilosExcel.bordes(workbook);
         XSSFCellStyle amarilloP = EstilosExcel.amarilloP(workbook);
-        XSSFCellStyle amarillo = EstilosExcel.amarillo(workbook);
         XSSFCellStyle verde = EstilosExcel.verde(workbook);
 
 
@@ -270,7 +277,7 @@ public class DataToExcel {
                     nombreAerolinea.setCellValue(cia.name);
                 }
             }
-            if(flight.AH.equals("IBE") || flight.AH.equals("MTO") ){
+            if(flight.AH.equals("IBE") || flight.AH.equals("DIM") ){
                 AAHH.setCellStyle(rojoAH);
                 aerolinea.setCellStyle(rojoAH);
                 nombreAerolinea.setCellStyle(rojoAH);
@@ -295,14 +302,24 @@ public class DataToExcel {
             Cell horaSalida = row.createCell(6);
             horaSalida.setCellValue(flight.timeD.toString());
             horaSalida.setCellStyle(bordes);
-            Cell destino = row.createCell(7);
+            Cell origen = row.createCell(7);
+            if (flight.origenAirport.equals(flight.AA)) {
+                origen.setCellValue(flight.origenAirport);
+            } else {
+                origen.setCellValue(flight.origenAirport + "/" + flight.AA);
+            }
+            origen.setCellStyle(bordes);
+            Cell destino = row.createCell(8);
             if (flight.as.equals(flight.af)) {
                 destino.setCellValue(flight.af);
             } else {
                 destino.setCellValue(flight.as + "/" + flight.af);
             }
             destino.setCellStyle(bordes);
-            int i = 8;
+            Cell serviceType = row.createCell(9);
+            serviceType.setCellValue(flight.flightTypeA);
+            serviceType.setCellStyle(bordes);
+            int i = 10;
             for (String day : days) {
                 if (flight.dayWeek.equals(day)) {
                     Cell avo = row.createCell(i);
@@ -325,12 +342,7 @@ public class DataToExcel {
                     i++;
                     Cell gate = row.createCell(i);
                     gate.setCellValue(flight.puerta);
-                    if(flight.puerta != null){
-                        gate.setCellStyle(amarilloP);
-                    }
-                    else{
-                        gate.setCellStyle(bordes);
-                    }
+                    gate.setCellStyle(bordes);
                     i++;
                     Cell pernocta = row.createCell(i);
                     pernocta.setCellValue(flight.pernocta);
@@ -342,22 +354,6 @@ public class DataToExcel {
                     }
                     i++;
                 } else {
-                    /*Cell p = row.createCell(i);
-                    p.setCellValue(" ");
-                    p.setCellStyle(bordes);
-                    i++;
-                    Cell p1 = row.createCell(i);
-                    p1.setCellValue(" ");
-                    p1.setCellStyle(bordes);
-                    i++;
-                    Cell p2 = row.createCell(i);
-                    p2.setCellValue(" ");
-                    p2.setCellStyle(bordes);
-                    i++;
-                    Cell p3 = row.createCell(i);
-                    p3.setCellValue(" ");
-                    p3.setCellStyle(bordes);
-                    i++;*/
                     i=i+4;
                 }
             }
