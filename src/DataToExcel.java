@@ -34,8 +34,7 @@ public class DataToExcel {
         writeData(hojaNAT, hojaAAT, flightListWeek, numWeek, columnNames);
         //Crear archivo
         File directorioActual = new File(selectedDirectory, nombreArchivo);
-        String ubicacion = directorioActual.getAbsolutePath();
-        String ubicacionArchivoSalida = ubicacion.substring(0, ubicacion.length() - 1) + nombreArchivo;
+        String ubicacionArchivoSalida = directorioActual.getAbsolutePath();
         FileOutputStream outputStream;
         try {
             outputStream = new FileOutputStream(ubicacionArchivoSalida);
@@ -66,69 +65,69 @@ public class DataToExcel {
                 0,
                 0,
                 1,
-                8
+                9
         ));
-        Cell lunes = firstRow.createCell(9);
+        Cell lunes = firstRow.createCell(10);
         lunes.setCellValue("Lunes");
         lunes.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                9,
-                12
+                10,
+                13
         ));
-        Cell martes = firstRow.createCell(13);
+        Cell martes = firstRow.createCell(14);
         martes.setCellValue("Martes");
         martes.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                13,
-                16
+                14,
+                17
         ));
-        Cell mie = firstRow.createCell(17);
+        Cell mie = firstRow.createCell(18);
         mie.setCellValue("Miercoles");
         mie.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                17,
-                20
+                18,
+                21
         ));
-        Cell jue = firstRow.createCell(21);
+        Cell jue = firstRow.createCell(22);
         jue.setCellValue("Jueves");
         jue.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                21,
-                24
+                22,
+                25
         ));
-        Cell vie = firstRow.createCell(25);
+        Cell vie = firstRow.createCell(26);
         vie.setCellValue("Viernes");
         vie.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                25,
-                28
+                26,
+                29
         ));
-        Cell sab = firstRow.createCell(29);
+        Cell sab = firstRow.createCell(30);
         sab.setCellValue("Sabado");
         sab.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                29,
-                32
+                30,
+                33
         ));
-        Cell dom = firstRow.createCell(33);
+        Cell dom = firstRow.createCell(34);
         dom.setCellValue("Domingo");
         dom.setCellStyle(primeraCabecera);
         sheet.addMergedRegion(new CellRangeAddress(
                 0,
                 0,
-                33,
+                34,
                 37
         ));
         Row secondRow = sheet.createRow(1);

@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 public class SetNumFlights {
@@ -19,15 +20,27 @@ public class SetNumFlights {
 
         if (!flightPairs.isEmpty()) {
             for (FlightPairs pair : flightPairs) {
-                for (Flight flight : flightListAEA) {
-                    if (flight.airlineA.equals(pair.airlineA) && flight.numA.equals(pair.numFlightAr)) {
-                        for (Flight flight1 : flightListAEA) {
-                            if (flight1.numD.equals(pair.numFlightDep) && flight1.airlineD.equals(pair.airlineD) && flight1.aircraftD.equals(flight.aircraftA)) {
-                                if (flight.numD == "-") {
-                                    if (flight.pernocta == 0) {
-                                        if (flight1.dateD.isEqual(flight.dateA)) {
-                                            if (pair.aircraft != null) {
-                                                if (pair.aircraft.equals(flight1.aircraftD)) {
+                if (pair.airlineA.equals(pair.airlineD)) {
+                    for (Flight flight : flightListAEA) {
+                        if (flight.airlineA.equals(pair.airlineA) && flight.numA.equals(pair.numFlightAr)) {
+                            for (Flight flight1 : flightListAEA) {
+                                if (flight1.numD.equals(pair.numFlightDep) && flight1.airlineD.equals(pair.airlineD) && flight1.aircraftD.equals(flight.aircraftA)) {
+                                    if (flight.numD == "-") {
+                                        if (flight.pernocta == 0) {
+                                            if (flight1.dateD.isEqual(flight.dateA)) {
+                                                if (pair.aircraft != null) {
+                                                    if (pair.aircraft.equals(flight1.aircraftD)) {
+                                                        flight.dateD = flight1.dateD;
+                                                        flight.airlineD = flight1.airlineD;
+                                                        flight.numD = flight1.numD;
+                                                        flight.timeD = flight1.timeD;
+                                                        flight.as = flight1.as;
+                                                        flight.af = flight1.af;
+                                                        flight.flightTypeD = flight1.flightTypeD;
+                                                        flight.aircraftD = flight1.aircraftD;
+                                                        removeFlightList.add(flight1);
+                                                    }
+                                                } else {
                                                     flight.dateD = flight1.dateD;
                                                     flight.airlineD = flight1.airlineD;
                                                     flight.numD = flight1.numD;
@@ -38,22 +51,49 @@ public class SetNumFlights {
                                                     flight.aircraftD = flight1.aircraftD;
                                                     removeFlightList.add(flight1);
                                                 }
-                                            } else {
-                                                flight.dateD = flight1.dateD;
-                                                flight.airlineD = flight1.airlineD;
-                                                flight.numD = flight1.numD;
-                                                flight.timeD = flight1.timeD;
-                                                flight.as = flight1.as;
-                                                flight.af = flight1.af;
-                                                flight.flightTypeD = flight1.flightTypeD;
-                                                flight.aircraftD = flight1.aircraftD;
-                                                removeFlightList.add(flight1);
+                                            }
+                                        } else {
+                                            LocalDate dateFlight = flight.dateA;
+                                            LocalDate dateFlight1 = dateFlight.plusDays(flight.pernocta);
+                                            if (flight1.dateD.isEqual(dateFlight1)) {
+                                                if (pair.aircraft != null) {
+                                                    if (pair.aircraft.equals(flight1.aircraftD)) {
+                                                        flight.dateD = flight1.dateD;
+                                                        flight.airlineD = flight1.airlineD;
+                                                        flight.numD = flight1.numD;
+                                                        flight.timeD = flight1.timeD;
+                                                        flight.as = flight1.as;
+                                                        flight.af = flight1.af;
+                                                        flight.flightTypeD = flight1.flightTypeD;
+                                                        flight.aircraftD = flight1.aircraftD;
+                                                        removeFlightList.add(flight1);
+                                                    }
+                                                } else {
+                                                    flight.dateD = flight1.dateD;
+                                                    flight.airlineD = flight1.airlineD;
+                                                    flight.numD = flight1.numD;
+                                                    flight.timeD = flight1.timeD;
+                                                    flight.as = flight1.as;
+                                                    flight.af = flight1.af;
+                                                    flight.flightTypeD = flight1.flightTypeD;
+                                                    flight.aircraftD = flight1.aircraftD;
+                                                    removeFlightList.add(flight1);
+                                                }
                                             }
                                         }
-                                    } else {
-                                        LocalDate dateFlight = flight.dateA;
-                                        LocalDate dateFlight1 = dateFlight.plusDays(flight.pernocta);
-                                        if (flight1.dateD.isEqual(dateFlight1)) {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else{
+                    for (Flight flight : flightListAEA) {
+                        if (flight.airlineA.equals(pair.airlineA) && flight.numA.equals(pair.numFlightAr)) {
+                            for (Flight flight1 : flightListAEA) {
+                                if (flight1.numD.equals(pair.numFlightDep) && flight1.airlineD.equals(pair.airlineD) && flight1.aircraftD.equals(flight.aircraftA)) {
+                                    if (flight1.dateD.isEqual(flight.dateA) || flight1.dateD.isAfter(flight.dateA)) {
+                                        if (flight.numD == "-") {
                                             if (pair.aircraft != null) {
                                                 if (pair.aircraft.equals(flight1.aircraftD)) {
                                                     flight.dateD = flight1.dateD;
@@ -64,6 +104,7 @@ public class SetNumFlights {
                                                     flight.af = flight1.af;
                                                     flight.flightTypeD = flight1.flightTypeD;
                                                     flight.aircraftD = flight1.aircraftD;
+                                                    flight.pernocta = (int) ChronoUnit.DAYS.between(flight.dateA,flight1.dateD);
                                                     removeFlightList.add(flight1);
                                                 }
                                             } else {
@@ -75,6 +116,7 @@ public class SetNumFlights {
                                                 flight.af = flight1.af;
                                                 flight.flightTypeD = flight1.flightTypeD;
                                                 flight.aircraftD = flight1.aircraftD;
+                                                flight.pernocta = (int) ChronoUnit.DAYS.between(flight.dateA,flight1.dateD);
                                                 removeFlightList.add(flight1);
                                             }
                                         }
@@ -97,7 +139,6 @@ public class SetNumFlights {
         FileInputStream inputStream = new FileInputStream(file);
         String filePath = file.getAbsolutePath();
         Workbook workbook = null;
-
         try{
             if (filePath.toLowerCase().endsWith(".xlsx")) {
                 workbook = new XSSFWorkbook(inputStream);

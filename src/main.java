@@ -20,7 +20,6 @@ import java.util.ArrayList;
 public class main extends JFrame {
     private ArrayList<Flight> flightList = new ArrayList<>();
     private ArrayList<Flight> flightListWeek = new ArrayList<>();
-    private ArrayList<Flight> flightListDayWeek = new ArrayList<>();
     private ArrayList<FlightLEVEL> flightListARMS = new ArrayList<>();
     private ArrayList<FlightLEVEL> flightListVictor = new ArrayList<>();
     private ArrayList <FlightARMS> flightListProcessorARMS = new ArrayList<>();
@@ -67,8 +66,6 @@ public class main extends JFrame {
                 int startIndex = selectedWeek.indexOf("Week ") + 5;
                 int endIndex = selectedWeek.indexOf(":", startIndex);
                 numWeekSelected = selectedWeek.substring(startIndex, endIndex).trim();
-                System.out.println("Número de la semana: " + numWeekSelected);
-                System.out.println("Semana seleccionada: " + selectedWeek);
             }
         });
 
@@ -132,6 +129,7 @@ public class main extends JFrame {
         JPanel buttonsPanel = new JPanel(new FlowLayout());
         buttonsPanel.add(showDataBtn);
         buttonsPanel.add(buildBtn);
+        buildBtn.setEnabled(false);
 
         FlightTableModel tableModel = new FlightTableModel(flightList);
         table = new JTable(tableModel);
@@ -172,7 +170,6 @@ public class main extends JFrame {
 
     private void excelEstatico() {
         JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
 
         FileNameExtensionFilter excelFilter = new FileNameExtensionFilter("Archivos de Excel", "xlsx", "xls");
         fileChooser.setFileFilter(excelFilter);
@@ -182,10 +179,8 @@ public class main extends JFrame {
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             String filePath = file.getAbsolutePath();
-            System.out.println(filePath);
             excelTextLabel.setText(filePath);
             rutaExcel = file;
-            System.out.println(rutaExcel);
         }
         else{
             JOptionPane.showMessageDialog(null, "Subir excel estatico", "Excel estatico", JOptionPane.WARNING_MESSAGE);
@@ -221,11 +216,12 @@ public class main extends JFrame {
     }
 
     private void showData() throws FileNotFoundException {
-        if (numWeekSelected != null && flightList != null) {
+        if (numWeekSelected != null && flightList != null && rutaExcel != null) {
             asociar();
             FlightTableModel tableModel = (FlightTableModel) table.getModel();
             tableModel.setFlightList(flightListWeek);
             tableModel.fireTableDataChanged();
+            buildBtn.setEnabled(true);
         }
         else{
             JOptionPane.showMessageDialog(null, "Se debe elegir la semana a construir/añadir datos", "Elegir semana a construir", JOptionPane.WARNING_MESSAGE);
@@ -286,22 +282,25 @@ public class main extends JFrame {
         String init = " ";
         weeksList.add(init);
 
+        LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+
         for (int i = currentWeek; i <= 52; i++) {
-            LocalDate startOfWeek = LocalDate.ofYearDay(currentYear, 1)
-                    .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, i)
-                    .with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
             LocalDate endOfWeek = startOfWeek.plusDays(6);
             String weekString = "Week " + i + ": " + startOfWeek.format(formatter) + " - " + endOfWeek.format(formatter);
             weeksList.add(weekString);
+
+            startOfWeek = startOfWeek.plusWeeks(1);
         }
 
+        // Handle the change of year
+        int nextYear = currentYear + 1;
         for (int i = 1; i <= currentWeek; i++) {
-            LocalDate startOfWeek = LocalDate.ofYearDay(currentYear + 1, 1)
+            LocalDate startOfWeek2 = LocalDate.ofYearDay(nextYear, 1)
                     .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, i)
-                    .with(TemporalAdjusters.previous(DayOfWeek.SUNDAY))
-                    .minusDays(1); // Obtenemos el domingo anterior y luego sumamos 1 día para obtener el lunes
-            LocalDate endOfWeek = startOfWeek.with(TemporalAdjusters.next(DayOfWeek.SUNDAY)); // Obtenemos el domingo de la misma semana
-            String weekString = "Week " + i + ": " + startOfWeek.format(formatter) + " - " + endOfWeek.format(formatter);
+                    .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            LocalDate endOfWeek = startOfWeek2.plusDays(6);
+            String weekString = "Week " + i + ": " + startOfWeek2.format(formatter) + " - " + endOfWeek.format(formatter);
             weeksList.add(weekString);
         }
 
@@ -367,7 +366,6 @@ public class main extends JFrame {
     }
 
     private void ficheroVictor() {
-        System.out.println("Victor");
         JFileChooser fileChooser = new JFileChooser();
 
         Workbook workbook = null;

@@ -57,8 +57,12 @@ public class DataProcessor {
                                     error = true;
                                 }
                             }else {
-                                DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                                dateA = LocalDate.parse("01/01/0001", format);
+                                try {
+                                    DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                                    dateA = LocalDate.parse(cell.getStringCellValue(), format);
+                                } catch (DateTimeParseException e) {
+                                    error = true;
+                                }
                             }
                             break;
                         case 2: //AH
@@ -154,8 +158,12 @@ public class DataProcessor {
                                     timeA = LocalTime.parse("00:00", format);
                                 }
                             } else {
-                                DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm");
-                                timeA = LocalTime.parse("00:00", format);
+                                try {
+                                    DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm");
+                                    timeA = LocalTime.parse("00:00", format);
+                                } catch (DateTimeException e) {
+                                    error = true;
+                                }
                             }
                             break;
                         case 11: //AO

@@ -5,29 +5,30 @@ public class JoinLEVEL {
     public static ArrayList<FlightLEVEL> joinLEVEL(ArrayList<FlightARMS> flightsARMS, ArrayList<String> matriculas) {
         ArrayList<FlightLEVEL> flightListLEVEL = new ArrayList<>();
 
-        for (String matricula : matriculas){
-            for (FlightARMS flight : flightsARMS){
-                if (matricula.equals(flight.matricula)){
-                    if (flight.dest.equals("BCN")){ //Vuelo de llegada
-                        Boolean find = false;
-                        for (FlightARMS flight1 : flightsARMS){
-                            int pernocta = 0;
-                            if(!find && flight1.origen.equals("BCN") && flight1.matricula.equals(flight.matricula) && (flight1.dateS.isEqual(flight.dateL) || flight1.dateS.isAfter(flight.dateL))){
-                                if (flight1.dateS.isEqual(flight.dateL)){
-                                    if (flight1.timeS.isAfter(flight.timeL)){
+        if(flightsARMS != null) {
+            for (String matricula : matriculas) {
+                for (FlightARMS flight : flightsARMS) {
+                    if (matricula.equals(flight.matricula)) {
+                        if (flight.dest.equals("BCN")) { //Vuelo de llegada
+                            Boolean find = false;
+                            for (FlightARMS flight1 : flightsARMS) {
+                                int pernocta = 0;
+                                if (!find && flight1.origen.equals("BCN") && flight1.matricula.equals(flight.matricula) && (flight1.dateS.isEqual(flight.dateL) || flight1.dateS.isAfter(flight.dateL))) {
+                                    if (flight1.dateS.isEqual(flight.dateL)) {
+                                        if (flight1.timeS.isAfter(flight.timeL)) {
+                                            find = true;
+                                        }
+                                    } else if (flight1.dateS.isAfter(flight.dateL)) {
                                         find = true;
-                                    }
-                                }
-                                else if (flight1.dateS.isAfter(flight.dateL)){
-                                    find = true;
-                                    pernocta = (int) ChronoUnit.DAYS.between(flight1.dateS, flight.dateL);
+                                        pernocta = (int) ChronoUnit.DAYS.between(flight1.dateS, flight.dateL);
 
-                                }
-                                if (find) {
-                                    if (flight.aircraft.equals(flight1.aircraft)) {
-                                        FlightLEVEL flightLEVEL = new FlightLEVEL(flight.asientos, flight.aircraft, flight.airline, flight.dateL, flight.numFlight, flight.origen, flight.dest,
-                                                flight.matricula, flight.timeL, flight1.timeS, flight1.dateS, flight1.numFlight, flight1.origen, flight1.dest, Math.abs(pernocta));
-                                        flightListLEVEL.add(flightLEVEL);
+                                    }
+                                    if (find) {
+                                        if (flight.aircraft.equals(flight1.aircraft)) {
+                                            FlightLEVEL flightLEVEL = new FlightLEVEL(flight.asientos, flight.aircraft, flight.airline, flight.dateL, flight.numFlight, flight.origen, flight.dest,
+                                                    flight.matricula, flight.timeL, flight1.timeS, flight1.dateS, flight1.numFlight, flight1.origen, flight1.dest, Math.abs(pernocta));
+                                            flightListLEVEL.add(flightLEVEL);
+                                        }
                                     }
                                 }
                             }
@@ -68,10 +69,6 @@ public class JoinLEVEL {
                 }
             }
             flightListAssociate.removeAll(removeFlightList);
-            for(Flight flightRemov: removeFlightList){
-                System.out.println("FLIGHTREMOVELIST aircraftA: " + flightRemov.aircraftA + " aircraftD: " + flightRemov.aircraftD +" airlineA: " + flightRemov.airlineA + " airlineD: " + flightRemov.airlineD +" numD: " + flightRemov.numD + " numA: " + flightRemov.numA +" OA: " + flightRemov.origenAirport + " AF: " + flightRemov.af + " dateA: " + flightRemov.dateA +
-                        " dateD: " + flightRemov.dateD + " timeAr: " + flightRemov.timeA + " timeDep: " + flightRemov.timeD + " pernocta: " + flightRemov.pernocta + " numFlightDep: " );
-            }
             return flightListAssociate;
         }
         else {

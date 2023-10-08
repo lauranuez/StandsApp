@@ -72,7 +72,7 @@ public class StandsMain extends JFrame {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         frame.getContentPane().add(mainPanel);
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setExtendedState(MAXIMIZED_BOTH);
         frame.setVisible(true);
     }
@@ -97,7 +97,6 @@ public class StandsMain extends JFrame {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println("Mouse clicked on table");
                 mouseClickedTable(e, table);
             }
         });
@@ -274,21 +273,18 @@ public class StandsMain extends JFrame {
                     if (flight != null) {
                         if (flight.type == "F") {
                             //Vuelo
-                            System.out.println("Stand al hacer click" + flight.stand);
                             String newStand = newStandMessage(flight,day);
                             if (!newStand.equals(flight.stand) && !newStand.equals("") && !newStand.equals(flight.stand)) {
                                 newStand(flight, newStand, table);
                             }
                         } else if (flight.type == "M") {
                             //Mantenimiento
-                            System.out.println("ClickMTO" + flight.stand);
                             newMTOMessage(flight, table);
                         } else if (flight.type == "P") {
                             //Pernocta
                             ArrayList<Flight> listDay = Utils.getFlightsDay(day, numWeek, flightListWeek);
                             Flight flightInDay = Utils.getFlightByNumberTable(flight.id, listDay, valueCol);
                             if (flightInDay.type.equals("PAD")){
-                                System.out.println("Stand al hacer click" + flight.stand);
                                 String newStand = newStandMessage(flight, day);
                                 if (!newStand.equals(flight.stand) && !newStand.equals("")) {
                                     newStand(flight, newStand, table);
@@ -331,7 +327,6 @@ public class StandsMain extends JFrame {
             Boolean standSearchBool = Utils.standSearch(stands, newStand);
             if (standSearchBool)
             {
-                System.out.println("newStand antes de llamar a searchCollision" + flight.stand);
                 if (flight.type == "P") {
                     searchCollisionPernocta(newStand, flight, table);
                 } else {
@@ -352,9 +347,6 @@ public class StandsMain extends JFrame {
 
         String door = dialog.getTextDoorValue();
         String stand = dialog.getTextStandValue();
-
-        System.out.println("Valor 1: " + door);
-        System.out.println("Valor 2: " + stand);
 
         return stand;
     }
@@ -402,12 +394,9 @@ public class StandsMain extends JFrame {
                         }
                         else{
                             String collision = "Vuelos con los que se solapa: ";
-                            System.out.println(flightsCollision.size());
                             for (Flight fl : flightsCollision) {
-                                System.out.println(fl.id);
                                 collision = collision + " " + fl.id;
                             }
-                            System.out.println(collision);
                             String newStandCollision = newStandCollision(collision, stand);
                             if (newStandCollision!=null) {
                                 newStand(flight, newStandCollision, table);
@@ -416,12 +405,9 @@ public class StandsMain extends JFrame {
                     }
                     else{
                         String collision = "Vuelos con los que se solapa: ";
-                        System.out.println(flightsCollision.size());
                         for (Flight fl : flightsCollision) {
-                            System.out.println(fl.id);
                             collision = collision + " " + fl.id;
                         }
-                        System.out.println(collision);
                         String newStandCollision = newStandCollision(collision, stand);
                         if (newStandCollision!=null) {
                             newStand(flight, newStandCollision, table);
@@ -443,12 +429,9 @@ public class StandsMain extends JFrame {
                     }
                     else{
                         String collision = "Vuelos con los que se solapa: ";
-                        System.out.println(flightsCollision.size());
                         for (Flight fl : flightsCollision) {
-                            System.out.println(fl.id);
                             collision = collision + " " + fl.id;
                         }
-                        System.out.println(collision);
                         String newStandCollision = newStandCollision(collision, stand);
                         if (newStandCollision!=null) {
                             newStand(flight, newStandCollision, table);
@@ -483,12 +466,9 @@ public class StandsMain extends JFrame {
         }
         else{
             String collision = "Vuelos con los que se solapa: ";
-            System.out.println(flightsCollision.size());
             for(Flight fl:flightsCollision){
-                System.out.println(fl.id);
                 collision = collision + " " + fl.id;
             }
-            System.out.println(collision);
             String newStandCollision = newStandCollision(collision, newStand);
             if(newStandCollision != null){
                 newStand(flight, newStandCollision, table);
@@ -512,12 +492,9 @@ public class StandsMain extends JFrame {
         }
         else{
             String collision = "Vuelos con los que se solapa: ";
-            System.out.println(flightsCollision.size());
             for(Flight fl:flightsCollision){
-                System.out.println(fl.id);
                 collision = collision + " " + fl.id;
             }
-            System.out.println(collision);
             String newStandCollision = newStandCollision(collision, newStand);
             if(newStandCollision != null){
                 newStand(flight, newStandCollision, table);
@@ -556,7 +533,6 @@ public class StandsMain extends JFrame {
         if (newStandCarreteo != null) {
             if(flight.type.equals("P")){
                 pernoctaCarreteo(newStandCarreteo, flight);
-                System.out.println("hola");
             }else{
                 if (!newStandCarreteo.equals(flight.stand)) {
                     ArrayList<Flight> flightsDay = Utils.getFlightsDay(day, numWeek, flightListWeek);
@@ -667,12 +643,10 @@ public class StandsMain extends JFrame {
                 if (date != null){
                     Flight MTO = new Flight(date, "DIM", terminal, 0, "73H", "DIM", standText.getText(), selectedStartTime, "ZZZ", "ZZZ", "-", "-",date, "DIM", standText.getText(),
                             selectedEndTime, "ZZZ", "ZZZ", "-", "-", "73H",0, Integer.parseInt(numWeek), day, standText.getText(), null, puertaText.getText(), nameText.getText(), "M", "N", nameText.getText(), null);
-                    System.out.println("name: " + nameText.getText() + " starTime: " + selectedStartTime + " endTime: " + selectedEndTime + " stand: " + standText.getText() + " en la pestaña: " + daysTP.getTitleAt(currentTabIndex));
 
                     ArrayList<Flight> flightsDay  = Utils.getFlightsDay(day, numWeek, flightListWeek);
                     ArrayList<Flight> flightsCollision = standsUtils.flightsCollision(flightsDay, standText.getText(), MTO);
 
-                    System.out.println("Mto collision: " + flightsCollision.size());
                     if (flightsCollision.isEmpty()){
                         flightListWeek.add(MTO);
                         updateTable(day);
